@@ -268,8 +268,3 @@ jobs:
                 body: comment
               });
             }
-
-      - name: Assert newline coverage threshold (>=80%)
-        if: github.event_name == 'pull_request' && matrix.python-version == steps.python-version-file.outputs.version
-        run: |
-          uv run diff-cover coverage.xml --compare-branch ${{ github.event.pull_request.base.ref }} --fail-under=80

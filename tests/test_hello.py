@@ -1,7 +1,32 @@
 """Unit tests for the hello module."""
 
 import pytest
-from nbn_dummy_package.hello import greet, main
+from nbn_dummy_package.hello import add, greet, main
+
+
+class TestAdd:
+    """Test cases for add function."""
+
+    @pytest.mark.parametrize(
+        "a,b,expected",
+        [
+            (1, 2, 3),
+            (-1, 1, 0),
+            (0, 0, 0),
+            (100, 200, 300),
+            (-5, -5, -10),
+            (123456, 654321, 777777),
+        ],
+    )
+    def test_add_parametrized(self, a: int, b: int, expected: int):
+        """Test add with multiple inputs using parametrize."""
+        result = add(a, b)
+        assert result == expected
+
+    def test_add_return_type(self):
+        """Test that add returns an integer."""
+        result = add(1, 2)
+        assert isinstance(result, int)
 
 
 class TestGreet:

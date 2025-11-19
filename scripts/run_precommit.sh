@@ -10,16 +10,14 @@
 #   --all-files: Run on all files (default)
 #   --from-ref REF --to-ref REF: Run on files changed between commits
 
-set -e  # Exit on error
+set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
-# Source UV helper functions
+# Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SOURCE_DIR}/helpers/uv.sh"
+source "${SOURCE_DIR}/helpers/common.sh"
 
-echo "================================"
-echo "Running Pre-commit Hooks"
-echo "================================"
-echo ""
+print_header "Running Pre-commit Hooks"
 
 # Check environment (pyproject.toml + uv + dependencies)
 check_environment
@@ -38,10 +36,7 @@ fi
 
 EXIT_CODE=$?
 
-echo ""
-echo "================================"
-echo "Pre-commit Summary"
-echo "================================"
+print_header "Pre-commit Summary"
 
 if [ $EXIT_CODE -eq 0 ]; then
     echo "✅ All pre-commit hooks passed!"

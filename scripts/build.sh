@@ -6,16 +6,14 @@
 # - Source code is in src/ directory
 # - Using hatchling or similar build backend
 
-set -e  # Exit on error
+set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
-# Source UV helper functions
+# Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SOURCE_DIR}/helpers/uv.sh"
+source "${SOURCE_DIR}/helpers/common.sh"
 
-echo "================================"
-echo "Python Package Build"
-echo "================================"
-echo ""
+print_header "Python Package Build"
 
 # Verify pyproject.toml and uv
 check_pyproject_toml
@@ -72,12 +70,10 @@ if [ "$WHEEL_COUNT" -eq 0 ] || [ "$SDIST_COUNT" -eq 0 ]; then
     echo "Found: $WHEEL_COUNT wheel(s), $SDIST_COUNT source dist(s)"
 fi
 
-echo "================================"
-echo "Build Summary"
-echo "================================"
+print_header "Build Summary"
 echo "📁 Build artifacts in dist/:"
 echo ""
-ls -lh dist/
+list_files dist
 echo ""
 echo "✅ Wheel files: $WHEEL_COUNT"
 echo "✅ Source distributions: $SDIST_COUNT"

@@ -6,16 +6,14 @@
 # - Dependencies are already installed via uv sync
 # - Using ruff for linting and formatting
 
-set -e  # Exit on error
+set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
-# Source UV helper functions
+# Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SOURCE_DIR}/helpers/uv.sh"
+source "${SOURCE_DIR}/helpers/common.sh"
 
-echo "================================"
-echo "Running Code Linting and Formatting"
-echo "================================"
-echo ""
+print_header "Running Code Linting and Formatting"
 
 # Check environment (pyproject.toml + uv + dependencies)
 check_environment
@@ -28,7 +26,7 @@ echo ""
 set +e  # Don't exit on ruff check failure, we want to report it
 uv run ruff check --fix .
 CHECK_EXIT_CODE=$?
-set -e
+set -euo pipefail
 
 echo ""
 echo "🎨 Running ruff format..."
@@ -37,12 +35,9 @@ echo ""
 set +e
 uv run ruff format .
 FORMAT_EXIT_CODE=$?
-set -e
+set -euo pipefail
 
-echo ""
-echo "================================"
-echo "Linting Summary"
-echo "================================"
+print_header "Linting Summary"
 
 if [ $CHECK_EXIT_CODE -eq 0 ] && [ $FORMAT_EXIT_CODE -eq 0 ]; then
     echo "✅ All checks passed!"

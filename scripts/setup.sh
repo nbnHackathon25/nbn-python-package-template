@@ -7,16 +7,14 @@
 # - Tests are in tests/ directory
 # - Using pytest, pytest-cov, and diff-cover for testing
 
-set -e  # Exit on error
+set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
-# Source UV helper functions
+# Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SOURCE_DIR}/helpers/uv.sh"
+source "${SOURCE_DIR}/helpers/common.sh"
 
-echo "================================"
-echo "Python Package Environment Setup"
-echo "================================"
-echo ""
+print_header "Python Package Environment Setup"
 
 # Verify pyproject.toml exists and install uv if needed
 check_pyproject_toml
@@ -58,11 +56,7 @@ else
     echo "ℹ️  pre-commit not found in dependencies, skipping hook installation"
 fi
 
-echo ""
-echo "================================"
-echo "✅ Setup Complete!"
-echo "================================"
-echo ""
+print_header "✅ Setup Complete!"
 echo "Next steps:"
 echo ""
 echo "  1. Run pre-commit checks:"
