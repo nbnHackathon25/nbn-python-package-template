@@ -17,7 +17,7 @@ DIFF_COVER_COMPARE_BRANCH="${1:-}"
 
 # Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SOURCE_DIR}/helpers/uv.sh"
+source "${SOURCE_DIR}/helpers/python.sh"
 source "${SOURCE_DIR}/helpers/common.sh"
 
 print_header "Running Tests with Coverage"
