@@ -32,10 +32,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --frozen --all-extras
+          ./scripts/setup.sh
 
       - name: Run pre-commit
-        run: uv run pre-commit run --all-files
+        run: |
+          chmod +x scripts/lint.sh
+          # Use the same script that runs locally
+          # Skip ruff since pre-commit already runs it, just run pre-commit
+          uv run pre-commit run --all-files
 
   test:
     name: Test and Coverage (py${{ matrix.python-version }})
@@ -80,13 +84,21 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install dependencies
+      - name: Setup Environment
         run: |
-          uv sync --frozen --all-extras
+          ./scripts/setup.sh
 
       - name: Run tests with coverage
         run: |
+          ./scripts/run_tests.sh ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'origin/master' }}
+          # Use same script as local - it handles pytest, coverage, and diff-cover
+          # Capture output for PR comment
           uv run pytest --cov-report=html --cov-report=xml 2>&1 | tee pytest-output.txt
+
+          # Generate diff-cover report for PR with appropriate compare branch
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            uv run diff-cover coverage.xml --compare-branch ${{ github.event.pull_request.base.ref }} --format markdown:newline_report.md
+          fi
 
       - name: Upload coverage HTML report
         if: always()
@@ -95,11 +107,6 @@ jobs:
           name: coverage-report-html-python-${{ matrix.python-version }}
           path: htmlcov/
           retention-days: 5
-
-      - name: Create newline coverage report
-        if: github.event_name == 'pull_request' && matrix.python-version == steps.python-version-file.outputs.version
-        run: |
-           uv run diff-cover coverage.xml --compare-branch ${{ github.event.pull_request.base.ref }} --format markdown:newline_report.md
 
       - name: Comment PR with coverage
         if: github.event_name == 'pull_request' && matrix.python-version == steps.python-version-file.outputs.version
