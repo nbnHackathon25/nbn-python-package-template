@@ -1,4 +1,4 @@
-name: 1. Lint and Test [Auto]
+name: 1. Lint and Test [auto]
 
 on:
   pull_request:
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version-file: '.python-version'
@@ -30,16 +30,13 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install dependencies
+      - name: Setup environment
         run: |
           ./scripts/setup.sh
 
-      - name: Run pre-commit
+      - name: Run pre-commit hooks
         run: |
-          chmod +x scripts/lint.sh
-          # Use the same script that runs locally
-          # Skip ruff since pre-commit already runs it, just run pre-commit
-          uv run pre-commit run --all-files
+          ./scripts/run_precommit.sh
 
   test:
     name: Test and Coverage (py${{ matrix.python-version }})
@@ -73,7 +70,7 @@ jobs:
           version=$(cat .python-version | tr -d '\n')
           echo "version=$version" >> $GITHUB_OUTPUT
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
@@ -84,21 +81,13 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Setup Environment
+      - name: Setup environment
         run: |
           ./scripts/setup.sh
 
       - name: Run tests with coverage
         run: |
-          ./scripts/run_tests.sh ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'origin/master' }}
-          # Use same script as local - it handles pytest, coverage, and diff-cover
-          # Capture output for PR comment
-          uv run pytest --cov-report=html --cov-report=xml 2>&1 | tee pytest-output.txt
-
-          # Generate diff-cover report for PR with appropriate compare branch
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            uv run diff-cover coverage.xml --compare-branch ${{ github.event.pull_request.base.ref }} --format markdown:newline_report.md
-          fi
+          ./scripts/run_tests.sh ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
 
       - name: Upload coverage HTML report
         if: always()
@@ -115,45 +104,12 @@ jobs:
           script: |
             const fs = require('fs');
 
-            // Read overall coverage data
+            // Read coverage.xml for both coverage data and test statistics
             const coverage = fs.readFileSync('coverage.xml', 'utf8');
-            const match = coverage.match(/line-rate="([0-9.]+)"/);
-            const lineRate = match ? (parseFloat(match[1]) * 100).toFixed(2) : 'N/A';
 
-            // Read pytest output to get test statistics
-            let testsPassed = 'N/A';
-            let testsFailed = 'N/A';
-            let testsSkipped = 'N/A';
-            let testsTotal = 'N/A';
-
-            try {
-              const pytestOutput = fs.readFileSync('pytest-output.txt', 'utf8');
-
-              // Match patterns like "5 passed in 0.23s" or "5 passed, 2 failed in 0.23s"
-              const passedMatch = pytestOutput.match(/(\d+) passed/);
-              const failedMatch = pytestOutput.match(/(\d+) failed/);
-              const skippedMatch = pytestOutput.match(/(\d+) skipped/);
-
-              if (passedMatch) {
-                testsPassed = passedMatch[1];
-              }
-              if (failedMatch) {
-                testsFailed = failedMatch[1];
-              }
-              if (skippedMatch) {
-                testsSkipped = skippedMatch[1];
-              }
-
-              // Only calculate total if we have at least one valid test count
-              if (passedMatch || failedMatch || skippedMatch) {
-                const passedCount = parseInt(testsPassed) || 0;
-                const failedCount = parseInt(testsFailed) || 0;
-                const skippedCount = parseInt(testsSkipped) || 0;
-                testsTotal = passedCount + failedCount + skippedCount;
-              }
-            } catch (e) {
-              console.log('Could not read pytest output:', e);
-            }
+            // Extract overall coverage
+            const coverageMatch = coverage.match(/line-rate="([0-9.]+)"/);
+            const lineRate = coverageMatch ? (parseFloat(coverageMatch[1]) * 100).toFixed(2) : 'N/A';
 
             // Parse diff-cover report for new line coverage
             let diffCoverage = 'N/A';
@@ -217,18 +173,6 @@ jobs:
             // Get job URL
             const jobUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 
-            // Helper function to check if value is a valid positive number
-            const isValidPositive = (val) => val !== 'N/A' && parseInt(val) > 0;
-
-            // Build test info string
-            let testInfo = '';
-            if (isValidPositive(testsFailed)) {
-              testInfo += `, ${testsFailed} failed`;
-            }
-            if (isValidPositive(testsSkipped)) {
-              testInfo += `, ${testsSkipped} skipped`;
-            }
-
             // Build diff coverage section
             let diffCoverageSection = '';
             if (diffCoverage !== 'N/A') {
@@ -247,7 +191,6 @@ jobs:
               `**Overall Coverage: ${lineRate}%**\n\n` +
               `${lineRate !== 'N/A' && parseFloat(lineRate) >= 60 ? '✅' : '❌'} Overall coverage threshold: 60%\n\n` +
               diffCoverageSection +
-              `**Tests:** ${testsPassed} passed${testInfo} (${testsTotal} total)\n\n` +
               `**Job:** [View full job details](${jobUrl})\n\n` +
               `Full HTML coverage report available in job artifacts (retained for 5 days).`;
 
@@ -276,8 +219,3 @@ jobs:
                 body: comment
               });
             }
-
-      - name: Assert newline coverage threshold (>=80%)
-        if: github.event_name == 'pull_request' && matrix.python-version == steps.python-version-file.outputs.version
-        run: |
-          uv run diff-cover coverage.xml --compare-branch ${{ github.event.pull_request.base.ref }} --fail-under=80

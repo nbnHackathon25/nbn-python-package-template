@@ -1,21 +1,20 @@
 #!/bin/bash
 
-# Generic build script for Python packages using uv
-# Assumptions:
-# - pyproject.toml exists in the root directory
-# - Source code is in src/ directory
-# - Using hatchling or similar build backend
+# Build Python package using uv
+#
+# Requirements:
+# - pyproject.toml with build configuration
+# - Source code in src/ directory
+# - uv installed (run ./scripts/setup.sh first)
 
-set -e  # Exit on error
+set -euo pipefail
 
-# Source UV helper functions
+# Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SOURCE_DIR}/helpers/uv.sh"
+source "${SOURCE_DIR}/helpers/python.sh"
+source "${SOURCE_DIR}/helpers/common.sh"
 
-echo "================================"
-echo "Python Package Build"
-echo "================================"
-echo ""
+print_header "Python Package Build"
 
 # Verify pyproject.toml and uv
 check_pyproject_toml
@@ -33,7 +32,6 @@ echo "✅ Found pyproject.toml and src/ directory"
 show_uv_version
 echo ""
 
-# Clean previous build artifacts
 echo "🧹 Cleaning previous build artifacts..."
 rm -rf dist/ build/ *.egg-info
 find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -42,7 +40,6 @@ find . -type f -name "*.pyc" -delete 2>/dev/null || true
 echo "✅ Cleaned previous artifacts"
 echo ""
 
-# Build the package
 echo "📦 Building Python package..."
 echo "This will create both wheel (.whl) and source distribution (.tar.gz)"
 echo ""
@@ -58,7 +55,6 @@ echo ""
 echo "✅ Build completed successfully"
 echo ""
 
-# Validate build outputs
 if [ ! -d "dist" ]; then
     echo "❌ Error: dist/ directory not created"
     exit 1
@@ -72,12 +68,10 @@ if [ "$WHEEL_COUNT" -eq 0 ] || [ "$SDIST_COUNT" -eq 0 ]; then
     echo "Found: $WHEEL_COUNT wheel(s), $SDIST_COUNT source dist(s)"
 fi
 
-echo "================================"
-echo "Build Summary"
-echo "================================"
+print_header "Build Summary"
 echo "📁 Build artifacts in dist/:"
 echo ""
-ls -lh dist/
+list_files dist
 echo ""
 echo "✅ Wheel files: $WHEEL_COUNT"
 echo "✅ Source distributions: $SDIST_COUNT"

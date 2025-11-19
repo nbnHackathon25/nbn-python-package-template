@@ -1,34 +1,31 @@
 #!/bin/bash
 
-# Generic linting script for Python packages using uv and ruff
-# Assumptions:
-# - pyproject.toml exists with ruff configuration
-# - Dependencies are already installed via uv sync
-# - Using ruff for linting and formatting
+# Lint and format Python code using ruff
+#
+# Requirements:
+# - Dependencies installed (run ./scripts/setup.sh first)
+# - pyproject.toml with ruff configuration
 
-set -e  # Exit on error
+set -euo pipefail
 
-# Source UV helper functions
+# Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SOURCE_DIR}/helpers/uv.sh"
+source "${SOURCE_DIR}/helpers/python.sh"
+source "${SOURCE_DIR}/helpers/common.sh"
 
-echo "================================"
-echo "Running Code Linting and Formatting"
-echo "================================"
-echo ""
+print_header "Running Code Linting and Formatting"
 
 # Check environment (pyproject.toml + uv + dependencies)
 check_environment
 echo ""
 
-# Run ruff check with auto-fix
 echo "🔍 Running ruff check (with auto-fix)..."
 echo ""
 
-set +e  # Don't exit on ruff check failure, we want to report it
+set +e
 uv run ruff check --fix .
 CHECK_EXIT_CODE=$?
-set -e
+set -euo pipefail
 
 echo ""
 echo "🎨 Running ruff format..."
@@ -37,12 +34,9 @@ echo ""
 set +e
 uv run ruff format .
 FORMAT_EXIT_CODE=$?
-set -e
+set -euo pipefail
 
-echo ""
-echo "================================"
-echo "Linting Summary"
-echo "================================"
+print_header "Linting Summary"
 
 if [ $CHECK_EXIT_CODE -eq 0 ] && [ $FORMAT_EXIT_CODE -eq 0 ]; then
     echo "✅ All checks passed!"
