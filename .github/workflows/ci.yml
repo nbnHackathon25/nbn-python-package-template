@@ -36,10 +36,7 @@ jobs:
 
       - name: Run pre-commit
         run: |
-          chmod +x scripts/lint.sh
-          # Use the same script that runs locally
-          # Skip ruff since pre-commit already runs it, just run pre-commit
-          uv run pre-commit run --all-files
+          ./scripts/run_precommit.sh
 
   test:
     name: Test and Coverage (py${{ matrix.python-version }})
@@ -90,15 +87,9 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          ./scripts/run_tests.sh ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || 'origin/master' }}
+          chmod +x scripts/run_tests.sh scripts/helpers/uv.sh
           # Use same script as local - it handles pytest, coverage, and diff-cover
-          # Capture output for PR comment
-          uv run pytest --cov-report=html --cov-report=xml 2>&1 | tee pytest-output.txt
-
-          # Generate diff-cover report for PR with appropriate compare branch
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            uv run diff-cover coverage.xml --compare-branch ${{ github.event.pull_request.base.ref }} --format markdown:newline_report.md
-          fi
+          ./scripts/run_tests.sh ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
 
       - name: Upload coverage HTML report
         if: always()
@@ -115,44 +106,42 @@ jobs:
           script: |
             const fs = require('fs');
 
-            // Read overall coverage data
+            // Read coverage.xml for both coverage data and test statistics
             const coverage = fs.readFileSync('coverage.xml', 'utf8');
-            const match = coverage.match(/line-rate="([0-9.]+)"/);
-            const lineRate = match ? (parseFloat(match[1]) * 100).toFixed(2) : 'N/A';
 
-            // Read pytest output to get test statistics
+            // Extract overall coverage
+            const coverageMatch = coverage.match(/line-rate="([0-9.]+)"/);
+            const lineRate = coverageMatch ? (parseFloat(coverageMatch[1]) * 100).toFixed(2) : 'N/A';
+
+            // Extract test statistics from coverage.xml
+            // Pattern: <testsuite name="pytest" errors="0" failures="0" skipped="0" tests="9" ...>
             let testsPassed = 'N/A';
             let testsFailed = 'N/A';
             let testsSkipped = 'N/A';
             let testsTotal = 'N/A';
+            let testsErrors = '0';
 
-            try {
-              const pytestOutput = fs.readFileSync('pytest-output.txt', 'utf8');
+            const testsuiteMatch = coverage.match(/<testsuite[^>]*>/);
+            if (testsuiteMatch) {
+              const testsuite = testsuiteMatch[0];
 
-              // Match patterns like "5 passed in 0.23s" or "5 passed, 2 failed in 0.23s"
-              const passedMatch = pytestOutput.match(/(\d+) passed/);
-              const failedMatch = pytestOutput.match(/(\d+) failed/);
-              const skippedMatch = pytestOutput.match(/(\d+) skipped/);
+              const testsMatch = testsuite.match(/tests="(\d+)"/);
+              const failuresMatch = testsuite.match(/failures="(\d+)"/);
+              const skippedMatch = testsuite.match(/skipped="(\d+)"/);
+              const errorsMatch = testsuite.match(/errors="(\d+)"/);
 
-              if (passedMatch) {
-                testsPassed = passedMatch[1];
-              }
-              if (failedMatch) {
-                testsFailed = failedMatch[1];
-              }
-              if (skippedMatch) {
-                testsSkipped = skippedMatch[1];
-              }
+              if (testsMatch) {
+                const total = parseInt(testsMatch[1]);
+                const failures = failuresMatch ? parseInt(failuresMatch[1]) : 0;
+                const skipped = skippedMatch ? parseInt(skippedMatch[1]) : 0;
+                const errors = errorsMatch ? parseInt(errorsMatch[1]) : 0;
 
-              // Only calculate total if we have at least one valid test count
-              if (passedMatch || failedMatch || skippedMatch) {
-                const passedCount = parseInt(testsPassed) || 0;
-                const failedCount = parseInt(testsFailed) || 0;
-                const skippedCount = parseInt(testsSkipped) || 0;
-                testsTotal = passedCount + failedCount + skippedCount;
+                testsTotal = total.toString();
+                testsFailed = failures.toString();
+                testsSkipped = skipped.toString();
+                testsErrors = errors.toString();
+                testsPassed = (total - failures - skipped - errors).toString();
               }
-            } catch (e) {
-              console.log('Could not read pytest output:', e);
             }
 
             // Parse diff-cover report for new line coverage
@@ -224,6 +213,9 @@ jobs:
             let testInfo = '';
             if (isValidPositive(testsFailed)) {
               testInfo += `, ${testsFailed} failed`;
+            }
+            if (isValidPositive(testsErrors)) {
+              testInfo += `, ${testsErrors} errors`;
             }
             if (isValidPositive(testsSkipped)) {
               testInfo += `, ${testsSkipped} skipped`;
