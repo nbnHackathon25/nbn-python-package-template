@@ -37,6 +37,7 @@ repos:
         stages: [pre-commit]
       - id: name-tests-test
         args: ['--pytest-test-first']
+        stages: [pre-commit]
       - id: trailing-whitespace
         stages: [pre-commit]
 
