@@ -6,9 +6,7 @@
 # - Dependencies are already installed via uv sync
 # - pre-commit is configured in .pre-commit-config.yaml
 #
-# Usage: ./run_precommit.sh [--all-files|--from-ref REF --to-ref REF]
-#   --all-files: Run on all files (default)
-#   --from-ref REF --to-ref REF: Run on files changed between commits
+# Usage: ./run_precommit.sh
 
 set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
@@ -23,16 +21,9 @@ print_header "Running Pre-commit Hooks"
 check_environment
 echo ""
 
-# Parse command line arguments
-if [ "$1" = "--from-ref" ] && [ "$3" = "--to-ref" ]; then
-    echo "🔍 Running pre-commit on files changed between $2 and $4..."
-    echo ""
-    uv run pre-commit run --from-ref "$2" --to-ref "$4"
-else
-    echo "🔍 Running pre-commit on all files..."
-    echo ""
-    uv run pre-commit run --all-files
-fi
+echo "🔍 Running pre-commit on all files..."
+echo ""
+uv run pre-commit run --all-files
 
 EXIT_CODE=$?
 
