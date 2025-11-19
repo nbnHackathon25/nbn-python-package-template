@@ -23,7 +23,7 @@ permissions:
 jobs:
   prepare-release:
     name: Create Release PR
-    runs-on: code-scanning # TODO: change to your preferred runner
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
