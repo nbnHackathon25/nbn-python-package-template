@@ -360,9 +360,9 @@ dev = [
 [package.metadata.requires-dev]
 dev = [
     { name = "commitizen", specifier = ">=4.10.0" },
-    { name = "diff-cover", specifier = ">=9.7.1" },
-    { name = "pre-commit", specifier = ">=4.3.0" },
-    { name = "pytest", specifier = ">=8.4.2" },
+    { name = "diff-cover", specifier = ">=9.7.2" },
+    { name = "pre-commit", specifier = ">=4.4.0" },
+    { name = "pytest", specifier = ">=9.0.1" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-mock", specifier = ">=3.15.1" },
     { name = "ruff", specifier = ">=0.14.5" },

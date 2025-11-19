@@ -25,3 +25,13 @@ list_files() {
         ls -lh "$dir/"
     fi
 }
+
+# This function executes a command with its arguments, temporarily disabling strict error handling (set -e).
+# This allows the command to fail without causing the script to exit immediately, enabling proper error handling.
+run_command() {
+    set +e
+    "$@"
+    local exit_code=$?
+    set -euo pipefail
+    return $exit_code
+}

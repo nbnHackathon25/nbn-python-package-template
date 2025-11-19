@@ -20,79 +20,91 @@ SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SOURCE_DIR}/helpers/python.sh"
 source "${SOURCE_DIR}/helpers/common.sh"
 
-print_header "Running Tests with Coverage"
-
-check_environment
-echo ""
-
-echo "🧪 Running tests with coverage..."
-echo ""
-
-set +e
-uv run pytest
-TEST_EXIT_CODE=$?
-set -euo pipefail
-
-if [ $TEST_EXIT_CODE -ne 0 ]; then
+# Run pytest with coverage
+run_tests() {
+    echo "🧪 Running tests with coverage..."
     echo ""
-    echo "❌ Tests failed! (exit code: $TEST_EXIT_CODE)"
+
+    if ! run_command uv run pytest; then
+        local exit_code=$?
+        echo ""
+        echo "❌ Tests failed! (exit code: $exit_code)"
+        echo ""
+        echo "To debug:"
+        echo "  - Run specific test: uv run pytest tests/test_file.py::test_name -v"
+        echo "  - Run with more detail: uv run pytest -vv"
+        echo "  - Run with debugger: uv run pytest --pdb"
+        exit $exit_code
+    fi
+
     echo ""
-    echo "To debug:"
-    echo "  - Run specific test: uv run pytest tests/test_file.py::test_name -v"
-    echo "  - Run with more detail: uv run pytest -vv"
-    echo "  - Run with debugger: uv run pytest --pdb"
-    exit $TEST_EXIT_CODE
-fi
+    echo "✅ All tests passed!"
+    echo ""
+}
 
-echo ""
-echo "✅ All tests passed!"
-echo ""
+# Run diff-cover to check coverage on changed lines
+run_diff_cover() {
+    # Skip if coverage file or git repo doesn't exist
+    if [ ! -f "coverage.xml" ] || [ ! -d ".git" ]; then
+        echo "ℹ️  Skipping diff-cover (coverage.xml not found or not a git repo)"
+        return 0
+    fi
 
-if [ -f "coverage.xml" ] && [ -d ".git" ]; then
     echo "📊 Generating diff-cover report..."
     echo ""
 
-    if [ -n "$DIFF_COVER_COMPARE_BRANCH" ]; then
-        COMPARE_BRANCH="$DIFF_COVER_COMPARE_BRANCH"
+    local compare_branch="${DIFF_COVER_COMPARE_BRANCH:-$(get_default_branch)}"
+
+    if [ -z "$compare_branch" ]; then
+        echo "⚠️  Warning: Could not find origin/master or origin/main"
+        echo "Skipping diff-cover report"
+        return 0
+    fi
+
+    echo "Comparing against: $compare_branch"
+    echo ""
+
+    if run_command uv run diff-cover coverage.xml --compare-branch="$compare_branch" \
+            --format markdown:newline_report.md --fail-under=80; then
+        echo ""
+        echo "✅ Diff coverage: >= 80%"
+        return 0
     else
-        COMPARE_BRANCH=$(get_default_branch)
-        if [ -z "$COMPARE_BRANCH" ]; then
-            echo "⚠️  Warning: Could not find origin/master or origin/main"
-            echo "Skipping diff-cover report"
-        fi
-    fi
-
-    if [ -n "$COMPARE_BRANCH" ]; then
-        echo "Comparing against: $COMPARE_BRANCH"
+        local exit_code=$?
         echo ""
-
-        set +e
-        uv run diff-cover coverage.xml --compare-branch="$COMPARE_BRANCH" --format markdown:newline_report.md --fail-under=80
-        DIFF_COVER_EXIT_CODE=$?
-        set -euo pipefail
-
-        echo ""
-        if [ $DIFF_COVER_EXIT_CODE -eq 0 ]; then
-            echo "✅ Diff coverage: >= 80%"
-        else
-            echo "⚠️  Diff coverage: < 80%"
-            echo "New/changed code should have at least 80% test coverage. Please see newline_report.md for details."
-        fi
+        echo "⚠️  Diff coverage: < 80%"
+        echo "New/changed code should have at least 80% test coverage. Please see newline_report.md for details."
+        return $exit_code
     fi
-else
-    echo "ℹ️  Skipping diff-cover (coverage.xml not found or not a git repo)"
-    DIFF_COVER_EXIT_CODE=0
-fi
+}
 
-print_header "Test Summary"
-echo "✅ All tests passed"
-echo "📊 Coverage reports generated:"
-echo "   - Terminal: shown above"
-if [ -f "htmlcov/index.html" ]; then
-    echo "   - HTML: htmlcov/index.html"
-fi
-if [ -f "coverage.xml" ]; then
-    echo "   - XML: coverage.xml"
-fi
-echo ""
-exit ${DIFF_COVER_EXIT_CODE:-0}
+# Display test summary
+show_test_summary() {
+    print_header "Test Summary"
+    echo "✅ All tests passed"
+    echo "📊 Coverage reports generated:"
+    echo "   - Terminal: shown above"
+    [ -f "htmlcov/index.html" ] && echo "   - HTML: htmlcov/index.html"
+    [ -f "coverage.xml" ] && echo "   - XML: coverage.xml"
+    echo ""
+}
+
+# Main execution
+main() {
+    print_header "Running Tests with Coverage"
+
+    check_environment
+    ensure_dev_dependencies
+    echo ""
+
+    run_tests
+
+    run_diff_cover
+    local diff_cover_exit_code=$?
+
+    show_test_summary
+
+    exit $diff_cover_exit_code
+}
+
+main
