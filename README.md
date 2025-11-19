@@ -25,17 +25,17 @@ Add a brief description of your project here. Explain what it does and why it ex
 git clone <your-repository-url>
 cd <your-repository-name>
 
-# Install dependencies
-uv sync --all-groups
-
-# Install pre-commit hooks
-uv run pre-commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
+# Run setup script (installs uv, dependencies, and pre-commit hooks)
+./scripts/setup.sh
 ```
 
 ### Usage
 
 ```bash
-# Run the application (update with your actual command)
+# Run via script
+./scripts/run_local.sh
+
+# Run the application manually (update with your actual command)
 uv run python src/nbn_dummy_package/hello.py
 
 # Or run as a module
@@ -44,39 +44,49 @@ uv run python -m nbn_dummy_package.hello
 
 ## Development
 
-### Running Tests
+### Development Scripts
+
+This project includes helper scripts for common development tasks:
 
 ```bash
-# Run all tests
-uv run pytest -v
+# Setup environment (run once)
+./scripts/setup.sh
 
-# Run with coverage
-uv run pytest --cov=src --cov-report=term-missing
+# Run tests with coverage
+./scripts/run_tests.sh
 
-# Run specific test file
-uv run pytest tests/test_hello.py
+# Run linting and formatting
+./scripts/lint.sh
 
-# Run specific test class or function
-uv run pytest tests/test_hello.py::TestGreet::test_greet_parametrized
+# Run all pre-commit checks
+./scripts/run_precommit.sh
 
-# Run diff-cover to check coverage on changed lines
-uv run diff-cover coverage.xml --compare-branch=origin/master --format markdown:newline_report.md --fail-under=80
+# Build the package
+./scripts/build.sh
+
+# Try the package locally
+./scripts/run_local.sh
+
+# Clean generated files and artifacts
+./scripts/clean.sh          # Keep .venv/
+./scripts/clean.sh --all    # Remove .venv/ too
 ```
 
-### Code Quality
+### Manual Commands
+
+You can also run commands directly:
 
 ```bash
-# Run linting and formatting
+# Run specific test file
+uv run pytest tests/test_hello.py -v
+
+# Run linting
 uv run ruff check --fix
 uv run ruff format
 
-# Run all pre-commit hooks
+# Run pre-commit on all files
 uv run pre-commit run --all-files
 ```
-
-### Common Development Commands
-
-Add your project-specific commands here.
 
 ## CI/CD
 

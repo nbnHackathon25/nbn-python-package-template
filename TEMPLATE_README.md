@@ -32,14 +32,11 @@ Click "Use this template" button on GitHub or clone this repository.
 
 ### 3. Set Up Development Environment
 ```bash
-# Install dependencies
-uv sync --all-groups
-
-# Install pre-commit hooks
-uv run pre-commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg
+# Run the setup script (installs uv if needed, dependencies, and pre-commit hooks)
+./scripts/setup.sh
 
 # Verify setup
-uv run pre-commit run --all-files
+./scripts/run_precommit.sh
 ```
 
 ### 4. Start Developing
@@ -81,6 +78,18 @@ This template provides a solid foundation for Python projects with:
 │   ├── agents/
 │   ├── CODEOWNERS
 │   └── pull_request_template.md
+├── scripts/
+│   ├── helpers/
+│   │   ├── common.sh       # Generic helper functions
+│   │   ├── print.sh        # Print utilities
+│   │   └── python.sh       # Python-specific helpers
+│   ├── setup.sh            # Setup environment
+│   ├── build.sh            # Build package
+│   ├── lint.sh             # Run linting
+│   ├── run_tests.sh        # Run tests with coverage
+│   ├── run_precommit.sh    # Run pre-commit hooks
+│   ├── run_local.sh        # Demo package locally
+│   └── clean.sh            # Clean generated files
 ├── src/
 │   └── nbn_dummy_package/
 │       ├── __init__.py
@@ -93,9 +102,11 @@ This template provides a solid foundation for Python projects with:
 ├── .vscode/
 │   └── settings.json
 ├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
 ├── LICENSE
 ├── pyproject.toml
-└── README.md
+├── README.md
+└── TEMPLATE_README.md
 ```
 
 ## Requirements
@@ -124,27 +135,15 @@ git clone <repository-url>
 cd nbn-python-repo-template
 ```
 
-### 3. Install Dependencies
+### 3. Run Setup Script
 
 ```bash
-# Install all dependencies including dev dependencies
-uv sync --all-groups
-
-# Create and activate the virtual environment
-uv venv
-source .venv/bin/activate  # On Linux/macOS
-# or
-.venv\Scripts\activate     # On Windows
-```
-
-### 4. Install Pre-commit Hooks
-
-```bash
-# Install pre-commit hooks for both commit and push stages
-uv run pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
-
-# (Optional) Run against all files to verify setup
-uv run pre-commit run --all-files
+# The setup script will:
+# - Install uv if not present
+# - Create virtual environment
+# - Install all dependencies (including dev dependencies)
+# - Install pre-commit hooks
+./scripts/setup.sh
 ```
 
 **Pre-commit Hooks Included:**
@@ -170,6 +169,27 @@ Hooks run automatically at their respective stages, catching issues early while 
 ---
 
 ## Development
+
+### Development Scripts
+
+The project includes several helper scripts in the `scripts/` directory:
+
+| Script | Purpose | Usage |
+|--------|---------|-------|
+| `setup.sh` | Setup development environment | `./scripts/setup.sh` |
+| `lint.sh` | Run linting and formatting | `./scripts/lint.sh` |
+| `run_tests.sh` | Run tests with coverage | `./scripts/run_tests.sh [branch]` |
+| `run_precommit.sh` | Run all pre-commit hooks | `./scripts/run_precommit.sh` |
+| `build.sh` | Build distribution packages | `./scripts/build.sh` |
+| `run_local.sh` | Demo package locally | `./scripts/run_local.sh` |
+| `clean.sh` | Clean generated files | `./scripts/clean.sh [--all]` |
+
+**Helper Modules:**
+- `helpers/common.sh` - Generic helper functions (git, file operations)
+- `helpers/print.sh` - Print formatting utilities
+- `helpers/python.sh` - Python/uv-specific functions
+
+All scripts use strict error handling (`set -euo pipefail`) and provide clear feedback.
 
 ### Commit Message Convention
 
@@ -224,36 +244,27 @@ The commitizen CLI will prompt you for type, scope, description, and breaking ch
 
 ### Code Quality Checks
 
-#### Linting with Ruff
+#### Using Scripts (Recommended)
 
 ```bash
-# Check code for issues
-uv run ruff check
+# Run linting and formatting
+./scripts/lint.sh
 
-# Auto-fix issues where possible
+# Run all pre-commit checks
+./scripts/run_precommit.sh
+```
+
+#### Manual Commands
+
+```bash
+# Linting with Ruff
 uv run ruff check --fix
-
-# Check specific files
-uv run ruff check src/nbn_dummy_package/
-```
-
-#### Formatting with Ruff
-
-```bash
-# Check formatting
-uv run ruff format --check
-
-# Apply formatting
 uv run ruff format
-```
 
-#### Run Pre-commit Hooks Manually
-
-```bash
-# Run all hooks on all files
+# Run all pre-commit hooks
 uv run pre-commit run --all-files
 
-# Run specific hook only
+# Run specific hook
 uv run pre-commit run trailing-whitespace --all-files
 ```
 

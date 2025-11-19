@@ -25,3 +25,13 @@ list_files() {
         ls -lh "$dir/"
     fi
 }
+
+# Run command and handle exit code (disables strict error handling temporarily)
+run_command() {
+    local exit_code
+    set +e
+    "$@"
+    exit_code=$?
+    set -euo pipefail
+    return $exit_code
+}

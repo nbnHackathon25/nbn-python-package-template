@@ -13,52 +13,68 @@ SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SOURCE_DIR}/helpers/python.sh"
 source "${SOURCE_DIR}/helpers/common.sh"
 
-print_header "Running Code Linting and Formatting"
-
-# Check environment (pyproject.toml + uv + dependencies)
-check_environment
-ensure_dev_dependencies
-echo ""
-
-echo "🔍 Running ruff check (with auto-fix)..."
-echo ""
-
-set +e
-uv run ruff check --fix .
-CHECK_EXIT_CODE=$?
-set -euo pipefail
-
-echo ""
-echo "🎨 Running ruff format..."
-echo ""
-
-set +e
-uv run ruff format .
-FORMAT_EXIT_CODE=$?
-set -euo pipefail
-
-print_header "Linting Summary"
-
-if [ $CHECK_EXIT_CODE -eq 0 ] && [ $FORMAT_EXIT_CODE -eq 0 ]; then
-    echo "✅ All checks passed!"
-    echo "Your code is clean and properly formatted."
+# Run ruff check with auto-fix
+run_ruff_check() {
+    echo "🔍 Running ruff check (with auto-fix)..."
     echo ""
-    echo "Optional: Run comprehensive pre-commit checks:"
-    echo "  uv run pre-commit run --all-files"
-    exit 0
-else
+
+    run_command uv run ruff check --fix .
+    return $?
+}
+
+# Run ruff format
+run_ruff_format() {
+    echo ""
+    echo "🎨 Running ruff format..."
+    echo ""
+
+    run_command uv run ruff format .
+    return $?
+}
+
+# Display linting results
+show_linting_results() {
+    local check_exit_code=$1
+    local format_exit_code=$2
+
+    print_header "Linting Summary"
+
+    if [ $check_exit_code -eq 0 ] && [ $format_exit_code -eq 0 ]; then
+        echo "✅ All checks passed!"
+        echo "Your code is clean and properly formatted."
+        echo ""
+        echo "Optional: Run comprehensive pre-commit checks:"
+        echo "  uv run pre-commit run --all-files"
+        return 0
+    fi
+
     echo "⚠️  Some issues were found:"
-    if [ $CHECK_EXIT_CODE -ne 0 ]; then
-        echo "  - Ruff check found issues (exit code: $CHECK_EXIT_CODE)"
-    fi
-    if [ $FORMAT_EXIT_CODE -ne 0 ]; then
-        echo "  - Ruff format found issues (exit code: $FORMAT_EXIT_CODE)"
-    fi
+    [ $check_exit_code -ne 0 ] && echo "  - Ruff check found issues (exit code: $check_exit_code)"
+    [ $format_exit_code -ne 0 ] && echo "  - Ruff format found issues (exit code: $format_exit_code)"
     echo ""
     echo "Some issues may have been auto-fixed."
     echo "Please review the changes and commit them."
     echo ""
     echo "To see remaining issues:"
     echo "  uv run ruff check ."
-    exit 1
-fi
+    return 1
+}
+
+# Main execution
+main() {
+    print_header "Running Code Linting and Formatting"
+
+    check_environment
+    ensure_dev_dependencies
+    echo ""
+
+    run_ruff_check
+    local check_exit_code=$?
+
+    run_ruff_format
+    local format_exit_code=$?
+
+    show_linting_results $check_exit_code $format_exit_code
+}
+
+main
