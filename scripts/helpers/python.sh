@@ -85,7 +85,9 @@ ensure_dev_dependencies() {
 
     # Use uv to check which dev dependencies are missing
     for dep in "${required_dev_deps[@]}"; do
-        uv tree --depth 1 2>/dev/null | grep -q "${dep} " || missing_deps+=("$dep")
+        if ! uv pip list 2>/dev/null | grep -qE "^${dep}\s"; then
+            missing_deps+=("$dep")
+        fi
     done
 
     [ ${#missing_deps[@]} -eq 0 ] && return 0
@@ -94,13 +96,18 @@ ensure_dev_dependencies() {
     echo "📦 Adding and installing missing dependencies..."
     echo ""
 
+    local install_failed=false
     for dep in "${missing_deps[@]}"; do
-        uv add --dev "$dep" || {
-            echo "❌ Failed to add development dependencies"
-            exit 1
-        }
+        if ! uv add --dev "$dep"; then
+            install_failed=true
+        fi
     done
-
-    echo ""
-    echo "✅ Development dependencies added to pyproject.toml and installed"
+    if [ "$install_failed" = true ]; then
+        echo ""
+        echo "❌ Failed to add at least one development dependency"
+        exit 1
+    else
+        echo ""
+        echo "✅ Development dependencies added to pyproject.toml and installed"
+    fi
 }

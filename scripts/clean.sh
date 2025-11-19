@@ -7,7 +7,7 @@
 #
 # Usage:
 #   ./scripts/clean.sh          # Clean artifacts, keep .venv/
-#   ./scripts/clean.sh --all    # Clean everything including .venv/ and uv.lock
+#   ./scripts/clean.sh --all    # Clean everything including .venv/
 #
 # This script removes:
 # - Build artifacts (dist/, build/, *.egg-info/)
@@ -16,7 +16,7 @@
 # - Ruff cache (.ruff_cache/)
 # - Pre-commit cache (.pre-commit/)
 # - Generated reports (newline_report.md)
-# - Virtual environment and lock file (with --all flag)
+# - Virtual environment (with --all flag)
 
 set -euo pipefail
 
