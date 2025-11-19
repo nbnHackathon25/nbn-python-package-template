@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Generic script to run pre-commit hooks
-# Assumptions:
-# - pyproject.toml exists in the root directory
-# - Dependencies are already installed via uv sync
-# - pre-commit is configured in .pre-commit-config.yaml
+# Run pre-commit hooks on all files
 #
-# Usage: ./run_precommit.sh
+# Requirements:
+# - Dependencies installed (run ./scripts/setup.sh first)
+# - .pre-commit-config.yaml configuration file in root directory
 
 set -euo pipefail
 

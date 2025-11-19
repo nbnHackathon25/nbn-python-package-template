@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# Generic setup script for Python packages using uv
-# Assumptions:
-# - pyproject.toml exists in the root directory
-# - Source code is in src/ directory
-# - Tests are in tests/ directory
-# - Using pytest, pytest-cov, and diff-cover for testing
+# Setup Python development environment using uv
+#
+# Requirements:
+# - pyproject.toml with project dependencies
+# - Internet connection (to install uv and dependencies)
 
 set -euo pipefail
 

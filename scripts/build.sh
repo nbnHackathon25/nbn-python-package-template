@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# Generic build script for Python packages using uv
-# Assumptions:
-# - pyproject.toml exists in the root directory
-# - Source code is in src/ directory
-# - Using hatchling or similar build backend
+# Build Python package using uv
+#
+# Requirements:
+# - pyproject.toml with build configuration
+# - Source code in src/ directory
+# - uv installed (run ./scripts/setup.sh first)
 
 set -euo pipefail
 

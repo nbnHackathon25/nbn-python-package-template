@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# Generic test script for Python packages using pytest, pytest-cov, and diff-cover
-# Assumptions:
-# - pyproject.toml exists with pytest configuration
-# - Tests are in tests/ directory
-# - Source code is in src/ directory
-# - Dependencies are already installed via uv sync
+# Run tests with coverage using pytest and diff-cover
+#
+# Requirements:
+# - Dependencies installed (run ./scripts/setup.sh first)
+# - pyproject.toml with pytest configuration
+# - Tests in tests/ directory
+# - Source code in src/ directory
 #
 # Usage: ./run_tests.sh [compare-branch]
-#   compare-branch: Optional branch to compare against for diff-cover (e.g., origin/master)
+#   compare-branch: Optional branch for diff-cover comparison (default: origin/master or origin/main)
 
 set -euo pipefail
 
-DIFF_COVER_COMPARE_BRANCH="${1:-}"
 DIFF_COVER_COMPARE_BRANCH="${1:-}"
 
 # Source helper functions

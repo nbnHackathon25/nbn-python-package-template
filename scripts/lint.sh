@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Generic linting script for Python packages using uv and ruff
-# Assumptions:
-# - pyproject.toml exists with ruff configuration
-# - Dependencies are already installed via uv sync
-# - Using ruff for linting and formatting
+# Lint and format Python code using ruff
+#
+# Requirements:
+# - Dependencies installed (run ./scripts/setup.sh first)
+# - pyproject.toml with ruff configuration
 
 set -euo pipefail
 

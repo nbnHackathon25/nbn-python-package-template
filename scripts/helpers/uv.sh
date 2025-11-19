@@ -1,7 +1,6 @@
 #!/bin/bash
 
 check_pyproject_toml() {
-check_pyproject_toml() {
     if [ ! -f "pyproject.toml" ]; then
         echo "❌ Error: pyproject.toml not found in current directory"
         echo "Please run this script from the repository root."

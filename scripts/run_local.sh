@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Generic script to demonstrate Python package usage
-# Assumptions:
-# - pyproject.toml exists with [project.scripts] entry points
-# - Source code is in src/ directory
-# - Dependencies are already installed via uv sync
+# Demonstrate Python package usage and CLI entry points
+#
+# Requirements:
+# - Dependencies installed (run ./scripts/setup.sh first)
+# - pyproject.toml (optionally with [project.scripts] entry points)
 
 set -euo pipefail
 
