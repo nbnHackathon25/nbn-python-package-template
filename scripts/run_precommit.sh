@@ -16,6 +16,7 @@ source "${SOURCE_DIR}/helpers/common.sh"
 print_header "Running Pre-commit Hooks"
 
 check_environment
+ensure_dev_dependencies
 echo ""
 
 echo "🔍 Running pre-commit on all files..."

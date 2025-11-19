@@ -17,6 +17,7 @@ print_header "Running Code Linting and Formatting"
 
 # Check environment (pyproject.toml + uv + dependencies)
 check_environment
+ensure_dev_dependencies
 echo ""
 
 echo "🔍 Running ruff check (with auto-fix)..."

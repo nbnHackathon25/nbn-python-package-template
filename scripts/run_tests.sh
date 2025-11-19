@@ -23,6 +23,7 @@ source "${SOURCE_DIR}/helpers/common.sh"
 print_header "Running Tests with Coverage"
 
 check_environment
+ensure_dev_dependencies
 echo ""
 
 echo "🧪 Running tests with coverage..."

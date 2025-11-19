@@ -25,9 +25,9 @@ nbn-hello = "nbn_dummy_package.hello:main"
 [dependency-groups]
 dev = [
     "commitizen>=4.10.0",
-    "diff-cover>=9.7.1",
-    "pre-commit>=4.3.0",
-    "pytest>=8.4.2",
+    "diff-cover>=9.7.2",
+    "pre-commit>=4.4.0",
+    "pytest>=9.0.1",
     "pytest-cov>=7.0.0",
     "pytest-mock>=3.15.1",
     "ruff>=0.14.5",

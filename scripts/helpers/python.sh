@@ -77,3 +77,35 @@ get_main_module() {
         echo ""
     fi
 }
+
+# Check if development dependencies are defined in pyproject.toml, add and install if missing
+ensure_dev_dependencies() {
+    local required_dev_deps=("commitizen" "pytest" "pytest-cov" "pytest-mock" "diff-cover" "ruff" "pre-commit")
+    local missing_deps=()
+
+    # Use uv to check which dev dependencies are missing
+    for dep in "${required_dev_deps[@]}"; do
+        if ! uv tree --depth 1 2>/dev/null | grep -q "${dep} "; then
+            missing_deps+=("$dep")
+        fi
+    done
+
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        echo "⚠️  Missing development dependencies: ${missing_deps[*]}"
+        echo "📦 Adding and installing missing dependencies..."
+        echo ""
+
+        for dep in "${missing_deps[@]}"; do
+            uv add --dev "$dep"
+        done
+
+        if [ $? -eq 0 ]; then
+            echo ""
+            echo "✅ Development dependencies added to pyproject.toml and installed"
+        else
+            echo ""
+            echo "❌ Failed to add development dependencies"
+            exit 1
+        fi
+    fi
+}
