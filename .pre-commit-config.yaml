@@ -6,8 +6,8 @@ repos:
     hooks:
       - id: commitizen
         stages: [commit-msg]
-      - id: commitizen-branch
-        stages: [pre-push]
+      # - id: commitizen-branch # comment out if some commits in history do not follow conventional commit format
+      #   stages: [pre-push]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
