@@ -6,7 +6,7 @@
 # - Dependencies are already installed via uv sync
 # - Using ruff for linting and formatting
 
-set -euo pipefail  # Exit on error, undefined variables, and pipe failures
+set -euo pipefail
 
 # Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,11 +19,10 @@ print_header "Running Code Linting and Formatting"
 check_environment
 echo ""
 
-# Run ruff check with auto-fix
 echo "🔍 Running ruff check (with auto-fix)..."
 echo ""
 
-set +e  # Don't exit on ruff check failure, we want to report it
+set +e
 uv run ruff check --fix .
 CHECK_EXIT_CODE=$?
 set -euo pipefail

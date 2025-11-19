@@ -7,7 +7,7 @@
 # - Tests are in tests/ directory
 # - Using pytest, pytest-cov, and diff-cover for testing
 
-set -euo pipefail  # Exit on error, undefined variables, and pipe failures
+set -euo pipefail
 
 # Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -16,7 +16,6 @@ source "${SOURCE_DIR}/helpers/common.sh"
 
 print_header "Python Package Environment Setup"
 
-# Verify pyproject.toml exists and install uv if needed
 check_pyproject_toml
 echo "✅ Found pyproject.toml"
 
@@ -24,7 +23,6 @@ install_uv_if_missing
 show_uv_version
 echo ""
 
-# Sync dependencies
 echo "📦 Installing dependencies from pyproject.toml..."
 if [ -f "uv.lock" ]; then
     echo "Using locked dependencies (uv.lock)..."
@@ -42,7 +40,6 @@ fi
 echo "✅ Dependencies installed successfully"
 echo ""
 
-# Install pre-commit hooks if pre-commit is available
 if uv run which pre-commit &> /dev/null; then
     echo "🪝 Installing pre-commit hooks..."
     uv run pre-commit install --hook-type pre-commit --hook-type pre-push --hook-type commit-msg

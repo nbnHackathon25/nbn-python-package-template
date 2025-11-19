@@ -1,4 +1,4 @@
-name: 2. Create Release PR [Manual]
+name: 2. Create Release PR [manual]
 
 on:
   workflow_dispatch:
@@ -45,7 +45,7 @@ jobs:
           fetch-depth: 0
           ref: master
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version-file: '.python-version'
@@ -55,9 +55,9 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install dependencies
+      - name: Setup environment
         run: |
-          uv sync --frozen --all-extras
+          ./scripts/setup.sh
 
       - name: Configure git
         run: |

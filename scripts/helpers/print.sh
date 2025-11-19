@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Print utilities for shell scripts
-# Source this file in your scripts with: source "$(dirname "$0")/helpers/print.sh"
-
-# Function to print a header section
 print_header() {
     local title="$1"
     echo "================================"
@@ -12,20 +8,17 @@ print_header() {
     echo ""
 }
 
-# Function to print a separator
 print_separator() {
     echo ""
     echo "================================"
 }
 
-# Function to print a subsection separator
 print_subseparator() {
     echo ""
     echo "---"
     echo ""
 }
 
-# Function to handle exit codes with summary
 handle_exit_code() {
     local exit_code="$1"
     local success_message="$2"

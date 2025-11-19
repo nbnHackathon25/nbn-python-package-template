@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# Reusable UV helper functions for Python package scripts
-# Source this file in your scripts with: source "$(dirname "$0")/helpers/uv.sh"
-
-# Function to verify pyproject.toml exists
+check_pyproject_toml() {
 check_pyproject_toml() {
     if [ ! -f "pyproject.toml" ]; then
         echo "❌ Error: pyproject.toml not found in current directory"
@@ -12,7 +9,6 @@ check_pyproject_toml() {
     fi
 }
 
-# Function to check if uv is installed
 check_uv_installed() {
     if ! command -v uv &> /dev/null; then
         echo "❌ Error: uv is not installed"
@@ -21,7 +17,6 @@ check_uv_installed() {
     fi
 }
 
-# Function to install uv if not present (used only in setup.sh)
 install_uv_if_missing() {
     if ! command -v uv &> /dev/null; then
         echo ""
@@ -40,7 +35,6 @@ install_uv_if_missing() {
     fi
 }
 
-# Function to verify dependencies are installed
 check_dependencies_installed() {
     if [ ! -d ".venv" ] && [ ! -f "uv.lock" ]; then
         echo "⚠️  Warning: No virtual environment or lock file detected"
@@ -49,12 +43,10 @@ check_dependencies_installed() {
     fi
 }
 
-# Function to display uv version
 show_uv_version() {
     echo "✅ uv found: $(uv --version)"
 }
 
-# Combined check for most scripts (pyproject.toml + uv + dependencies)
 check_environment() {
     check_pyproject_toml
     check_uv_installed

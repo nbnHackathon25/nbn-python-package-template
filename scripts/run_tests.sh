@@ -10,9 +10,9 @@
 # Usage: ./run_tests.sh [compare-branch]
 #   compare-branch: Optional branch to compare against for diff-cover (e.g., origin/master)
 
-set -euo pipefail  # Exit on error, undefined variables, and pipe failures
+set -euo pipefail
 
-# Parse command line arguments
+DIFF_COVER_COMPARE_BRANCH="${1:-}"
 DIFF_COVER_COMPARE_BRANCH="${1:-}"
 
 # Source helper functions
@@ -22,15 +22,13 @@ source "${SOURCE_DIR}/helpers/common.sh"
 
 print_header "Running Tests with Coverage"
 
-# Check environment (pyproject.toml + uv + dependencies)
 check_environment
 echo ""
 
-# Run pytest with coverage (configuration from pyproject.toml)
 echo "🧪 Running tests with coverage..."
 echo ""
 
-set +e  # Don't exit on test failure, we want to report results
+set +e
 uv run pytest
 TEST_EXIT_CODE=$?
 set -euo pipefail
@@ -50,12 +48,10 @@ echo ""
 echo "✅ All tests passed!"
 echo ""
 
-# Generate diff-cover report if coverage.xml exists and git repo present
 if [ -f "coverage.xml" ] && [ -d ".git" ]; then
     echo "📊 Generating diff-cover report..."
     echo ""
 
-    # Use command line argument if provided, otherwise detect default branch
     if [ -n "$DIFF_COVER_COMPARE_BRANCH" ]; then
         COMPARE_BRANCH="$DIFF_COVER_COMPARE_BRANCH"
     else

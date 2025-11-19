@@ -6,7 +6,7 @@
 # - Source code is in src/ directory
 # - Using hatchling or similar build backend
 
-set -euo pipefail  # Exit on error, undefined variables, and pipe failures
+set -euo pipefail
 
 # Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,7 +31,6 @@ echo "✅ Found pyproject.toml and src/ directory"
 show_uv_version
 echo ""
 
-# Clean previous build artifacts
 echo "🧹 Cleaning previous build artifacts..."
 rm -rf dist/ build/ *.egg-info
 find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -40,7 +39,6 @@ find . -type f -name "*.pyc" -delete 2>/dev/null || true
 echo "✅ Cleaned previous artifacts"
 echo ""
 
-# Build the package
 echo "📦 Building Python package..."
 echo "This will create both wheel (.whl) and source distribution (.tar.gz)"
 echo ""
@@ -56,7 +54,6 @@ echo ""
 echo "✅ Build completed successfully"
 echo ""
 
-# Validate build outputs
 if [ ! -d "dist" ]; then
     echo "❌ Error: dist/ directory not created"
     exit 1

@@ -1,4 +1,4 @@
-name: 1. Lint and Test [Auto]
+name: 1. Lint and Test [auto]
 
 on:
   pull_request:
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version-file: '.python-version'
@@ -30,11 +30,11 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install dependencies
+      - name: Setup environment
         run: |
           ./scripts/setup.sh
 
-      - name: Run pre-commit
+      - name: Run pre-commit hooks
         run: |
           ./scripts/run_precommit.sh
 
@@ -70,7 +70,7 @@ jobs:
           version=$(cat .python-version | tr -d '\n')
           echo "version=$version" >> $GITHUB_OUTPUT
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
@@ -81,14 +81,12 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Setup Environment
+      - name: Setup environment
         run: |
           ./scripts/setup.sh
 
       - name: Run tests with coverage
         run: |
-          chmod +x scripts/run_tests.sh scripts/helpers/uv.sh
-          # Use same script as local - it handles pytest, coverage, and diff-cover
           ./scripts/run_tests.sh ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
 
       - name: Upload coverage HTML report
@@ -112,37 +110,6 @@ jobs:
             // Extract overall coverage
             const coverageMatch = coverage.match(/line-rate="([0-9.]+)"/);
             const lineRate = coverageMatch ? (parseFloat(coverageMatch[1]) * 100).toFixed(2) : 'N/A';
-
-            // Extract test statistics from coverage.xml
-            // Pattern: <testsuite name="pytest" errors="0" failures="0" skipped="0" tests="9" ...>
-            let testsPassed = 'N/A';
-            let testsFailed = 'N/A';
-            let testsSkipped = 'N/A';
-            let testsTotal = 'N/A';
-            let testsErrors = '0';
-
-            const testsuiteMatch = coverage.match(/<testsuite[^>]*>/);
-            if (testsuiteMatch) {
-              const testsuite = testsuiteMatch[0];
-
-              const testsMatch = testsuite.match(/tests="(\d+)"/);
-              const failuresMatch = testsuite.match(/failures="(\d+)"/);
-              const skippedMatch = testsuite.match(/skipped="(\d+)"/);
-              const errorsMatch = testsuite.match(/errors="(\d+)"/);
-
-              if (testsMatch) {
-                const total = parseInt(testsMatch[1]);
-                const failures = failuresMatch ? parseInt(failuresMatch[1]) : 0;
-                const skipped = skippedMatch ? parseInt(skippedMatch[1]) : 0;
-                const errors = errorsMatch ? parseInt(errorsMatch[1]) : 0;
-
-                testsTotal = total.toString();
-                testsFailed = failures.toString();
-                testsSkipped = skipped.toString();
-                testsErrors = errors.toString();
-                testsPassed = (total - failures - skipped - errors).toString();
-              }
-            }
 
             // Parse diff-cover report for new line coverage
             let diffCoverage = 'N/A';
@@ -206,21 +173,6 @@ jobs:
             // Get job URL
             const jobUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 
-            // Helper function to check if value is a valid positive number
-            const isValidPositive = (val) => val !== 'N/A' && parseInt(val) > 0;
-
-            // Build test info string
-            let testInfo = '';
-            if (isValidPositive(testsFailed)) {
-              testInfo += `, ${testsFailed} failed`;
-            }
-            if (isValidPositive(testsErrors)) {
-              testInfo += `, ${testsErrors} errors`;
-            }
-            if (isValidPositive(testsSkipped)) {
-              testInfo += `, ${testsSkipped} skipped`;
-            }
-
             // Build diff coverage section
             let diffCoverageSection = '';
             if (diffCoverage !== 'N/A') {
@@ -239,7 +191,6 @@ jobs:
               `**Overall Coverage: ${lineRate}%**\n\n` +
               `${lineRate !== 'N/A' && parseFloat(lineRate) >= 60 ? '✅' : '❌'} Overall coverage threshold: 60%\n\n` +
               diffCoverageSection +
-              `**Tests:** ${testsPassed} passed${testInfo} (${testsTotal} total)\n\n` +
               `**Job:** [View full job details](${jobUrl})\n\n` +
               `Full HTML coverage report available in job artifacts (retained for 5 days).`;
 

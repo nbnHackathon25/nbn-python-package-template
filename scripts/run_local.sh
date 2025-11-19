@@ -6,7 +6,7 @@
 # - Source code is in src/ directory
 # - Dependencies are already installed via uv sync
 
-set -euo pipefail  # Exit on error, undefined variables, and pipe failures
+set -euo pipefail
 
 # Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -15,11 +15,9 @@ source "${SOURCE_DIR}/helpers/common.sh"
 
 print_header "Python Package Demo"
 
-# Check environment (pyproject.toml + uv + dependencies)
 check_environment
 echo ""
 
-# Extract package name and entry points from pyproject.toml
 echo "📦 Detecting package information..."
 echo ""
 
@@ -32,7 +30,6 @@ else
     echo "⚠️  Could not detect package name from pyproject.toml"
 fi
 
-# Extract entry points
 ENTRY_POINTS=$(get_entry_points)
 
 if [ -n "$ENTRY_POINTS" ]; then
@@ -45,7 +42,6 @@ if [ -n "$ENTRY_POINTS" ]; then
     done
     print_header "Running Entry Points"
 
-    # Run each entry point
     echo "$ENTRY_POINTS" | while read -r cmd; do
         if [ -n "$cmd" ]; then
             echo "→ Running: $cmd"

@@ -8,7 +8,7 @@
 #
 # Usage: ./run_precommit.sh
 
-set -euo pipefail  # Exit on error, undefined variables, and pipe failures
+set -euo pipefail
 
 # Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,7 +17,6 @@ source "${SOURCE_DIR}/helpers/common.sh"
 
 print_header "Running Pre-commit Hooks"
 
-# Check environment (pyproject.toml + uv + dependencies)
 check_environment
 echo ""
 

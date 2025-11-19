@@ -1,4 +1,4 @@
-name: 3. Build and Release [Auto]
+name: 3. Build and Release [auto]
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version-file: '.python-version'
@@ -51,12 +51,13 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install dependencies
+      - name: Setup environment
         run: |
-          uv sync --frozen --all-extras
+          ./scripts/setup.sh
 
-      - name: Build package
-        run: uv build
+      - name: Build Python package
+        run: |
+          ./scripts/build.sh
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v5
