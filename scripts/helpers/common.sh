@@ -26,12 +26,12 @@ list_files() {
     fi
 }
 
-# Run command and handle exit code (disables strict error handling temporarily)
+# This function executes a command with its arguments, temporarily disabling strict error handling (set -e).
+# This allows the command to fail without causing the script to exit immediately, enabling proper error handling.
 run_command() {
-    local exit_code
     set +e
     "$@"
-    exit_code=$?
+    local exit_code=$?
     set -euo pipefail
     return $exit_code
 }

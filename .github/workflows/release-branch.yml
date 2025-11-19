@@ -78,7 +78,7 @@ jobs:
         run: |
           uv lock --upgrade
 
-      - name: Upgrade pre-commits
+      - name: Upgrade pre-commit hooks
         run: |
           uv run pre-commit autoupdate
 

@@ -75,6 +75,7 @@ main() {
     local format_exit_code=$?
 
     show_linting_results $check_exit_code $format_exit_code
+    exit $?
 }
 
 main

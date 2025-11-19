@@ -74,23 +74,14 @@ verify_build_outputs() {
         echo "⚠️  Warning: Expected both wheel and source distribution"
         echo "Found: $wheel_count wheel(s), $sdist_count source dist(s)"
     fi
-
-    echo "$wheel_count $sdist_count"
 }
 
 # Display build summary and next steps
 show_build_summary() {
-    local counts=($1)
-    local wheel_count=${counts[0]}
-    local sdist_count=${counts[1]}
-
     print_header "Build Summary"
     echo "📁 Build artifacts in dist/:"
     echo ""
     list_files dist
-    echo ""
-    echo "✅ Wheel files: $wheel_count"
-    echo "✅ Source distributions: $sdist_count"
     echo ""
     echo "Next steps:"
     echo ""
@@ -114,8 +105,8 @@ main() {
     clean_build_artifacts
     build_package
 
-    local build_counts=$(verify_build_outputs)
-    show_build_summary "$build_counts"
+    verify_build_outputs
+    show_build_summary
 }
 
 main

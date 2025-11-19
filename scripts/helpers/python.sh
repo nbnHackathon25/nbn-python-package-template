@@ -78,7 +78,7 @@ get_main_module() {
     fi
 }
 
-# Check if development dependencies are defined in pyproject.toml, add and install if missing
+# Check if development dependencies are installed, add to pyproject.toml and install if missing
 ensure_dev_dependencies() {
     local required_dev_deps=("commitizen" "pytest" "pytest-cov" "pytest-mock" "diff-cover" "ruff" "pre-commit")
     local missing_deps=()
