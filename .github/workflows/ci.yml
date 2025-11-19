@@ -1,0 +1,276 @@
+name: 1. Lint and Test [Auto]
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  pre-commit:
+    name: Pre-commit Checks
+    runs-on: code-scanning  # TODO: change to your preferred runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: '.python-version'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --frozen --all-extras
+
+      - name: Run pre-commit
+        run: uv run pre-commit run --all-files
+
+  test:
+    name: Test and Coverage (py${{ matrix.python-version }})
+    runs-on: code-scanning # TODO: change to your preferred runner
+    needs: pre-commit
+    permissions:
+      contents: read
+      pull-requests: write
+
+    strategy:
+      max-parallel: 2
+      matrix:
+        python-version: ['3.12', '3.13']
+
+    steps:
+      - name: Checkout code (with commit history)
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Ensure master is accessible for diff-cover for pull request
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags --depth=1 origin ${{ github.event.pull_request.base.ref }}
+          git checkout ${{ github.event.pull_request.base.ref }}
+          git checkout ${{ github.event.pull_request.head.sha }}
+
+      - name: Read Python version from .python-version
+        id: python-version-file
+        run: |
+          version=$(cat .python-version | tr -d '\n')
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip' # caching pip dependencies
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --frozen --all-extras
+
+      - name: Run tests with coverage
+        run: |
+          uv run pytest --cov-report=html --cov-report=xml 2>&1 | tee pytest-output.txt
+
+      - name: Upload coverage HTML report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: coverage-report-html-python-${{ matrix.python-version }}
+          path: htmlcov/
+          retention-days: 5
+
+      - name: Create newline coverage report
+        if: github.event_name == 'pull_request' && matrix.python-version == steps.python-version-file.outputs.version
+        run: |
+           uv run diff-cover coverage.xml --compare-branch ${{ github.event.pull_request.base.ref }} --format markdown:newline_report.md
+
+      - name: Comment PR with coverage
+        if: github.event_name == 'pull_request' && matrix.python-version == steps.python-version-file.outputs.version
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Read overall coverage data
+            const coverage = fs.readFileSync('coverage.xml', 'utf8');
+            const match = coverage.match(/line-rate="([0-9.]+)"/);
+            const lineRate = match ? (parseFloat(match[1]) * 100).toFixed(2) : 'N/A';
+
+            // Read pytest output to get test statistics
+            let testsPassed = 'N/A';
+            let testsFailed = 'N/A';
+            let testsSkipped = 'N/A';
+            let testsTotal = 'N/A';
+
+            try {
+              const pytestOutput = fs.readFileSync('pytest-output.txt', 'utf8');
+
+              // Match patterns like "5 passed in 0.23s" or "5 passed, 2 failed in 0.23s"
+              const passedMatch = pytestOutput.match(/(\d+) passed/);
+              const failedMatch = pytestOutput.match(/(\d+) failed/);
+              const skippedMatch = pytestOutput.match(/(\d+) skipped/);
+
+              if (passedMatch) {
+                testsPassed = passedMatch[1];
+              }
+              if (failedMatch) {
+                testsFailed = failedMatch[1];
+              }
+              if (skippedMatch) {
+                testsSkipped = skippedMatch[1];
+              }
+
+              // Only calculate total if we have at least one valid test count
+              if (passedMatch || failedMatch || skippedMatch) {
+                const passedCount = parseInt(testsPassed) || 0;
+                const failedCount = parseInt(testsFailed) || 0;
+                const skippedCount = parseInt(testsSkipped) || 0;
+                testsTotal = passedCount + failedCount + skippedCount;
+              }
+            } catch (e) {
+              console.log('Could not read pytest output:', e);
+            }
+
+            // Parse diff-cover report for new line coverage
+            let diffCoverage = 'N/A';
+            let diffCoverageDetails = '';
+            let totalLines = 0;
+            let missingLines = 0;
+
+            try {
+              const diffCoverReport = fs.readFileSync('newline_report.md', 'utf8');
+
+              // Check if there are no lines with coverage
+              if (diffCoverReport.includes('No lines with coverage information in this diff')) {
+                diffCoverage = 'N/A';
+                diffCoverageDetails = 'No lines with coverage information in this diff';
+              } else {
+                // Extract coverage percentage from Summary section with bold markdown
+                // Pattern: "- **Coverage**: 95%"
+                const coverageMatch = diffCoverReport.match(/[-*]\s*\*\*Coverage\*\*:\s*(\d+(?:\.\d+)?)%/i);
+                if (coverageMatch) {
+                  diffCoverage = parseFloat(coverageMatch[1]).toFixed(2);
+                }
+
+                // Extract total lines: "- **Total**: 20 lines"
+                const totalMatch = diffCoverReport.match(/[-*]\s*\*\*Total\*\*:\s*(\d+)\s*lines?/i);
+                if (totalMatch) {
+                  totalLines = parseInt(totalMatch[1]);
+                }
+
+                // Extract missing lines: "- **Missing**: 1 line"
+                const missingMatch = diffCoverReport.match(/[-*]\s*\*\*Missing\*\*:\s*(\d+)\s*lines?/i);
+                if (missingMatch) {
+                  missingLines = parseInt(missingMatch[1]);
+                }
+
+                // Extract file details - handle HTML entities like &#46; (which is .)
+                // Match patterns like "- src/utils/constants&#46;py (100%)" or "- src/utils/repo_info&#46;py (75.0%): Missing lines 35"
+                const fileMatches = diffCoverReport.matchAll(/^-\s+(.+?)\s+\((\d+(?:\.\d+)?)%\)(?:\s*:\s*Missing lines?\s*(.+))?$/gm);
+                const fileDetails = [];
+                for (const match of fileMatches) {
+                  const [, filePath, coverage, missing] = match;
+                  // Decode HTML entities
+                  const decodedPath = filePath.replace(/&#46;/g, '.').replace(/&#47;/g, '/').trim();
+                  let detail = `- ${decodedPath}: ${coverage}%`;
+                  if (missing) {
+                    detail += ` (missing: ${missing.trim()})`;
+                  }
+                  fileDetails.push(detail);
+                }
+
+                if (fileDetails.length > 0) {
+                  diffCoverageDetails = fileDetails.join('\n');
+                } else if (diffCoverage !== 'N/A') {
+                  diffCoverageDetails = `${totalLines} line(s) added, ${missingLines} line(s) missing coverage`;
+                }
+              }
+            } catch (e) {
+              console.log('Could not read diff-cover report:', e);
+              diffCoverageDetails = 'Report not available';
+            }
+
+            // Get job URL
+            const jobUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            // Helper function to check if value is a valid positive number
+            const isValidPositive = (val) => val !== 'N/A' && parseInt(val) > 0;
+
+            // Build test info string
+            let testInfo = '';
+            if (isValidPositive(testsFailed)) {
+              testInfo += `, ${testsFailed} failed`;
+            }
+            if (isValidPositive(testsSkipped)) {
+              testInfo += `, ${testsSkipped} skipped`;
+            }
+
+            // Build diff coverage section
+            let diffCoverageSection = '';
+            if (diffCoverage !== 'N/A') {
+              const diffCoverageNum = parseFloat(diffCoverage);
+              const diffThresholdMet = diffCoverageNum >= 80;
+              diffCoverageSection = `**New Line Coverage (diff-cover): ${diffCoverage}%**\n\n` +
+                `${diffThresholdMet ? '✅' : '❌'} New line coverage threshold: 80%\n\n`;
+              if (diffCoverageDetails) {
+                diffCoverageSection += `<details>\n<summary>Diff Coverage Details</summary>\n\n${diffCoverageDetails}\n\n</details>\n\n`;
+              }
+            } else {
+              diffCoverageSection = `**New Line Coverage (diff-cover): N/A**\n\n${diffCoverageDetails}\n\n`;
+            }
+
+            const comment = `## Coverage Report\n\n` +
+              `**Overall Coverage: ${lineRate}%**\n\n` +
+              `${lineRate !== 'N/A' && parseFloat(lineRate) >= 60 ? '✅' : '❌'} Overall coverage threshold: 60%\n\n` +
+              diffCoverageSection +
+              `**Tests:** ${testsPassed} passed${testInfo} (${testsTotal} total)\n\n` +
+              `**Job:** [View full job details](${jobUrl})\n\n` +
+              `Full HTML coverage report available in job artifacts (retained for 5 days).`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' && comment.body.includes('Coverage Report')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+      - name: Assert newline coverage threshold (>=80%)
+        if: github.event_name == 'pull_request' && matrix.python-version == steps.python-version-file.outputs.version
+        run: |
+          uv run diff-cover coverage.xml --compare-branch ${{ github.event.pull_request.base.ref }} --fail-under=80

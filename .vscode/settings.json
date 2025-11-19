@@ -1,0 +1,59 @@
+{
+    "chat.agent.maxRequests": 100,
+    "chat.tools.terminal.autoApprove": {
+        "cat": true,
+        "printf": true,
+        "uv": true,
+        "pytest": true
+    },
+    "editor.renderWhitespace": "trailing",
+    "editor.rulers": [
+        120
+    ],
+    "files.autoSave": "onFocusChange",
+    "files.associations": {
+        "*.pyx": "cython"
+    },
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "git.enableSmartCommit": true,
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.openRepositoryInParentFolders": "always",
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "markdown.validate.enabled": true,
+    "python.analysis.autoImportCompletions": false,
+    "python.analysis.completeFunctionParens": false,
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.logLevel": "Error",
+    "python.createEnvironment.contentButton": "show",
+    "python.languageServer": "Pylance",
+    "python.missingPackage.severity": "Error",
+    "ruff.fixAll": false,
+    "ruff.organizeImports": false,
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter-notebook"
+    },
+    "[python]": {
+        "editor.tabSize": 4,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnType": false,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "never"
+        }
+    },
+    "[yaml]": {
+        "editor.tabSize": 2,
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 80,
+        "editor.defaultFormatter": "redhat.vscode-yaml",
+        "editor.formatOnSave": false
+    },
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

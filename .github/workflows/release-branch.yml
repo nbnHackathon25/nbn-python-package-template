@@ -1,0 +1,160 @@
+name: 2. Create Release PR [Manual]
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type, patch=bugfix, minor=new features, major=breaking changes'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+      custom_version:
+        description: 'Custom version (optional, overrides bump type, e.g., 1.2.3)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  prepare-release:
+    name: Create Release PR
+    runs-on: code-scanning # TODO: change to your preferred runner
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      new_version: ${{ steps.release_info.outputs.version }}
+      changelog: ${{ steps.release_info.outputs.changelog }}
+      pr_number: ${{ steps.create_pr.outputs.pr_number }}
+    steps:
+      - name: Verify starting point is master
+        run: |
+          if [ "${GITHUB_REF}" != "refs/heads/master" ]; then
+            echo "Must dispatch from master. Current ref: ${GITHUB_REF}" >&2
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: '.python-version'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --frozen --all-extras
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version with custom version
+        if: inputs.custom_version != ''
+        run: |
+          uv run cz bump --yes --check-consistency ${{ inputs.custom_version }}
+
+      - name: Bump version with increment
+        if: inputs.custom_version == ''
+        run: |
+          uv run cz bump --yes --check-consistency --increment ${{ inputs.version_bump }}
+
+      - name: Bump lock file
+        run: |
+          uv lock --upgrade
+
+      - name: Capture version & changelog
+        id: release_info
+        run: |
+          # Extract version directly from pyproject.toml after bump
+          VERSION=$(grep -E '^version\s*=\s*"[0-9]+\.[0-9]+\.[0-9]+"' pyproject.toml | head -1 | sed -E 's/version\s*=\s*"([0-9]+\.[0-9]+\.[0-9]+)"/\1/')
+          if [ -z "$VERSION" ]; then
+            echo "Failed to determine version from pyproject.toml" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          # Determine previous tag (excluding the newly created v$VERSION tag)
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | awk -v current="v$VERSION" '$0!=current {print; exit}')
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "previous_tag=$PREVIOUS_TAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "previous_tag=" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Extract changelog section for this version
+          if [ -f CHANGELOG.md ]; then
+            SECTION=$(awk -v version="$VERSION" '
+              BEGIN { found=0 }
+              /^## (v)?[0-9]+\.[0-9]+\.[0-9]+/ {
+                if (found) exit
+                if ($0 ~ "## " version " " || $0 ~ "## v" version " ") { found=1; next }
+              }
+              found { print }
+            ' CHANGELOG.md)
+            [ -z "$SECTION" ] && SECTION="Automated release for version $VERSION."
+          else
+            SECTION="Automated release for version $VERSION."
+          fi
+          {
+            echo "changelog<<EOF"
+            # Ensure newline at end so GitHub Actions parser closes the heredoc properly
+            printf "%s\n" "$SECTION"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create release branch
+        id: create_branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.release_info.outputs.version }}"
+          BRANCH="release/v${VERSION}"
+          echo "branch_name=$BRANCH" >> "$GITHUB_OUTPUT"
+          git checkout -b "$BRANCH"
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} "$BRANCH"
+
+      - name: Open Pull Request
+        id: create_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.release_info.outputs.version }}"
+          BRANCH="${{ steps.create_branch.outputs.branch_name }}"
+          PREVIOUS_TAG="${{ steps.release_info.outputs.previous_tag }}"
+          if [ -n "$PREVIOUS_TAG" ]; then
+            DIFF_URL="https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${BRANCH}"
+            DIFF_SECTION=$(printf "\n\nDiff since tag %s: %s" "$PREVIOUS_TAG" "$DIFF_URL")
+          else
+            DIFF_SECTION="\n\nNo previous tag found to compare."
+          fi
+          RAW_BODY="Automated release PR for version v${VERSION}\n\nChangelog:\n${{ steps.release_info.outputs.changelog }}${DIFF_SECTION}"
+          BODY=$(printf "%s" "$RAW_BODY" | jq -Rs .)
+          DATA=$(printf '{"title":"[CI] Release: v%s","head":"%s","base":"master","body":%s}' "$VERSION" "$BRANCH" "$BODY")
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/pulls \
+            -d "$DATA")
+          PR_NUMBER=$(echo "$RESPONSE" | jq -r '.number')
+          if [ "$PR_NUMBER" = "null" ] || [ -z "$PR_NUMBER" ]; then
+            echo "Failed to create PR: $RESPONSE" >&2
+            exit 1
+          fi
+          echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Created PR #$PR_NUMBER"

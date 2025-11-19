@@ -1,0 +1,15 @@
+# Each line is a file pattern followed by one or more owners.
+# The last matching pattern takes precedence.
+
+# Default owners for everything in the repo
+# TODO: Replace @nbnco/dsoe_dto_administrators with your team's administrator group
+* @nbnco/dsoe_dto_administrators
+
+# Example: Assign specific team to documentation
+# docs/ @nbnco/docs-team
+
+# Example: Assign team to tests
+# tests/ @nbnco/qa-team
+
+# Example: Assign multiple teams to important files
+# pyproject.toml @nbnco/dsoe_dto_administrators @nbnco/devops-team
