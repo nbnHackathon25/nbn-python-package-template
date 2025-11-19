@@ -4,15 +4,9 @@ COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${COMMON_DIR}/print.sh"
 
 get_package_name() {
-COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${COMMON_DIR}/print.sh"
-
-# Function to extract package name from pyproject.toml
-get_package_name() {
     grep "^name = " pyproject.toml 2>/dev/null | head -1 | sed -E 's/.*name.*=.*"([^"]+)".*/\1/' || echo ""
 }
 
-# Function to extract entry points from pyproject.toml
 get_entry_points() {
     awk '/^\[project\.scripts\]/{flag=1;next}/^\[/{flag=0}flag && /^[a-zA-Z0-9_-]+ *=/{print}' pyproject.toml 2>/dev/null | sed -E 's/^([a-zA-Z0-9_-]+).*/\1/' || echo ""
 }
