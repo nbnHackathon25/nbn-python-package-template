@@ -14,7 +14,7 @@ permissions:
 jobs:
   pre-commit:
     name: Pre-commit Checks
-    runs-on: code-scanning  # TODO: change to your preferred runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -39,7 +39,7 @@ jobs:
 
   test:
     name: Test and Coverage (py${{ matrix.python-version }})
-    runs-on: code-scanning # TODO: change to your preferred runner
+    runs-on: ubuntu-latest
     needs: pre-commit
     permissions:
       contents: read
