@@ -229,24 +229,27 @@ jobs:
       - name: Upload build artifact
         id: upload
         uses: actions/upload-artifact@v5
+        if: matrix.python-version == steps.python-version-file.outputs.version
         with:
           path: dist/*
-          name: artifact-${{ matrix.python-version }}.zip
+          name: artifact.zip
 
       - uses: actions/attest-build-provenance@v3
+        if: matrix.python-version == steps.python-version-file.outputs.version
         with:
-          subject-name: artifact-${{ matrix.python-version }}-${{ steps.upload.outputs.artifact-id }}.zip
+          subject-name: artifact.zip
           subject-digest: sha256:${{ steps.upload.outputs.artifact-digest }}
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
+        if: matrix.python-version == steps.python-version-file.outputs.version
         with:
           path: dist
           format: 'cyclonedx-json'
-          artifact-name: sbom-${{ matrix.python-version }}-${{ steps.upload.outputs.artifact-id }}.cyclonedx.json
           output-file: sbom.cyclonedx.json
       - name: Attest
         uses: actions/attest-sbom@v3
+        if: matrix.python-version == steps.python-version-file.outputs.version
         with:
           subject-path: 'dist/*.whl, dist/*.tar.gz'
-          sbom-path: sbom-${{ matrix.python-version }}-${{ steps.upload.outputs.artifact-id }}.cyclonedx.json
+          sbom-path: sbom.cyclonedx.json
