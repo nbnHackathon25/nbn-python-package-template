@@ -228,12 +228,24 @@ jobs:
 
       - name: Upload build artifact
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: dist/*
           name: artifact.zip
 
       - uses: actions/attest-build-provenance@v3
         with:
-          subject-name: artifact.zip
+          subject-name: artifact-${{ steps.upload.outputs.artifact-id }}.zip
           subject-digest: sha256:${{ steps.upload.outputs.artifact-digest }}
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: dist
+          format: 'spdx-json'
+          output-file: 'sbom.spdx.json'
+      - name: Attest
+        uses: actions/attest-sbom@v3
+        with:
+          subject-path: '${{ github.workspace }}/dist'
+          sbom-path: 'sbom.spdx.json'
