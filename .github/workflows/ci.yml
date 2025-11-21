@@ -243,7 +243,8 @@ jobs:
         with:
           path: dist
           format: 'cyclonedx-json'
-          output-file: sbom-${{ matrix.python-version }}-${{ steps.upload.outputs.artifact-id }}.cyclonedx.json
+          artifact-name: sbom-${{ matrix.python-version }}-${{ steps.upload.outputs.artifact-id }}.cyclonedx.json
+          output-file: sbom.cyclonedx.json
       - name: Attest
         uses: actions/attest-sbom@v3
         with:
