@@ -231,7 +231,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           path: dist/*
-          name: artifact.zip
+          name: artifact-${{ matrix.python-version }}.zip
 
       - uses: actions/attest-build-provenance@v3
         with:
@@ -242,10 +242,10 @@ jobs:
         uses: anchore/sbom-action@v0
         with:
           path: dist
-          format: 'spdx-json'
-          output-file: 'sbom.spdx.json'
+          format: 'cyclonedx-json'
+          output-file: 'sbom.cyclonedx.json'
       - name: Attest
         uses: actions/attest-sbom@v3
         with:
           subject-path: '${{ github.workspace }}/dist'
-          sbom-path: 'sbom.spdx.json'
+          sbom-path: 'sbom.cyclonedx.json'
