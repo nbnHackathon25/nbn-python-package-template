@@ -235,7 +235,7 @@ jobs:
 
       - uses: actions/attest-build-provenance@v3
         with:
-          subject-name: artifact-${{ steps.upload.outputs.artifact-id }}.zip
+          subject-name: artifact-${{ matrix.python-version }}-${{ steps.upload.outputs.artifact-id }}.zip
           subject-digest: sha256:${{ steps.upload.outputs.artifact-digest }}
 
       - name: Generate SBOM
