@@ -37,6 +37,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: verify
     if: needs.verify.outputs.is_release == 'true'
+    permissions:
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -88,12 +91,12 @@ jobs:
           sbom-path: sbom.cyclonedx.json
 
 
-      - name: Publish to Artifactory Pro
-        env:
-          UV_PUBLISH_USERNAME: ""
-          UV_PUBLISH_PASSWORD: ${{ secrets.JFROG_TOKEN }} # Replace with your JFROG token secret in GitHub
-        run: |
-          uv publish --index nbn-artifactory
+      # - name: Publish to Artifactory Pro
+      #   env:
+      #     UV_PUBLISH_USERNAME: ""
+      #     UV_PUBLISH_PASSWORD: ${{ secrets.JFROG_TOKEN }} # Replace with your JFROG token secret in GitHub
+      #   run: |
+      #     uv publish --index nbn-artifactory
 
   create-tag:
     name: Create Git Tag
