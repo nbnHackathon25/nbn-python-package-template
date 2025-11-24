@@ -38,6 +38,7 @@ jobs:
     needs: verify
     if: needs.verify.outputs.is_release == 'true'
     permissions:
+      contents: read
       id-token: write
       attestations: write
     steps:
