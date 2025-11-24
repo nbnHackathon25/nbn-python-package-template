@@ -96,6 +96,7 @@ main() {
 
     verify_prerequisites
     install_dependencies
+    ensure_dev_dependencies
     install_pre_commit_hooks
     show_next_steps
 }

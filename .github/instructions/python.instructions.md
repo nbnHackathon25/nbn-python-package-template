@@ -1,6 +1,6 @@
 ---
-applyTo: "**/*.py, **/*.pyi, pyproject.toml"
 description: "Python specific instructions for AI-assisted development. Sourced (and modified) from: https://github.com/Code-and-Sorts/awesome-copilot-agents/blob/main/instructions/languages/python/python.instructions.md"
+applyTo: "**/*.py, **/*.pyi, pyproject.toml"
 ---
 # GitHub Copilot Instructions
 

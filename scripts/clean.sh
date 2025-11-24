@@ -50,7 +50,7 @@ remove_test_artifacts() {
 remove_python_cache() {
     echo ""
     echo "🧹 Removing Python cache files..."
-    find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+    find . -type d -name "__pycache__" -prune -exec rm -rf {} + 2>/dev/null || true
     find . -type f -name "*.pyc" -delete 2>/dev/null || true
     find . -type f -name "*.pyo" -delete 2>/dev/null || true
     echo "   ✓ Removed: __pycache__/, *.pyc, *.pyo"

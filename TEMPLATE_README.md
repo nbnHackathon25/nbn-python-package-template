@@ -23,7 +23,7 @@ A modern Python project template for NBN Co repositories, following Python best 
 Click "Use this template" button on GitHub or clone this repository.
 
 ### 2. Customize Your Project
-- Update `pyproject.toml`: package name, version, authors, description
+- Update `pyproject.toml`: package name, version, authors, description, NBN artifactory's publish-url
 - Rename `src/nbn_dummy_package/` to your package name
 - Update imports in `tests` to match new package name
 - Replace `README.md` with your project-specific documentation
@@ -61,8 +61,6 @@ This template provides a solid foundation for Python projects with:
 - ✅ **Pre-commit Hooks**: Automated code quality checks and testing before commits
 - ✅ **Testing Framework**: Complete test setup with `pytest` and `pytest-cov`
 - ✅ **Coverage Enforcement**: New line coverage validation (diff-cover) in CI
-- ✅ **Type Hints**: Encouraged use of Python type hints
-- ✅ **Documentation**: Well-documented code with docstrings
 - ✅ **Project Structure**: Follows src-layout for better package organization
 
 ## Project Structure
@@ -288,7 +286,6 @@ This project follows [PEP 8](https://pep8.org/) style guidelines, enforced by `r
 - Line length: 120 characters
 - Indentation: 4 spaces
 - Quote style: Double quotes
-- Import sorting: Automatic with `isort` integration
 - Type hints: Encouraged for all functions
 
 ---
@@ -357,8 +354,9 @@ This template includes a complete CI/CD pipeline using GitHub Actions with two m
 1. Calculates the next version (or uses `custom_version`) via `uv version`
 2. Updates the changelog using Commitizen: `cz changelog --unreleased-version <version>`
 3. Bumps the project version using Commitizen: `cz bump --increment <type>` or `cz bump <version>`
-4. Creates a release branch `release/v<version>`
-5. Opens a Pull Request targeting `master`
+4. Bumps locl file and upgrades pre-commit hooks
+5. Creates a release branch `release/v<version>`
+6. Opens a Pull Request targeting `master`
 
 This workflow does not publish artifacts or create a GitHub Release. After the PR is merged, use your organization’s publish/tagging process or a dedicated "Publish Release" workflow if configured.
 

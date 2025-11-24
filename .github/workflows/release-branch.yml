@@ -67,12 +67,12 @@ jobs:
       - name: Bump version with custom version
         if: inputs.custom_version != ''
         run: |
-          uv run cz bump --yes --check-consistency ${{ inputs.custom_version }}
+          uv run cz bump --yes --check-consistency ${{ inputs.custom_version }} --files-only
 
       - name: Bump version with increment
         if: inputs.custom_version == ''
         run: |
-          uv run cz bump --yes --check-consistency --increment ${{ inputs.version_bump }}
+          uv run cz bump --yes --check-consistency --increment ${{ inputs.version_bump }} --files-only
 
       - name: Bump lock file
         run: |
@@ -131,6 +131,8 @@ jobs:
           BRANCH="release/v${VERSION}"
           echo "branch_name=$BRANCH" >> "$GITHUB_OUTPUT"
           git checkout -b "$BRANCH"
+          git add -A .
+          git commit -m "chore(release): prepare release v${VERSION}"
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} "$BRANCH"
 
       - name: Open Pull Request
@@ -141,20 +143,40 @@ jobs:
           VERSION="${{ steps.release_info.outputs.version }}"
           BRANCH="${{ steps.create_branch.outputs.branch_name }}"
           PREVIOUS_TAG="${{ steps.release_info.outputs.previous_tag }}"
+
+          # Write the PR body to a temp file to preserve newlines
+          cat > /tmp/pr_body.md <<EOF
+          Automated release PR for version v${VERSION}
+
+          ## Changelog
+          ${{ steps.release_info.outputs.changelog }}
+          EOF
+
+          # Add diff section if previous tag exists
           if [ -n "$PREVIOUS_TAG" ]; then
             DIFF_URL="https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${BRANCH}"
-            DIFF_SECTION=$(printf "\n\nDiff since tag %s: %s" "$PREVIOUS_TAG" "$DIFF_URL")
+            cat >> /tmp/pr_body.md <<EOF
+
+          ---
+          **Diff since ${PREVIOUS_TAG}:** ${DIFF_URL}
+          EOF
           else
-            DIFF_SECTION="\n\nNo previous tag found to compare."
+            echo -e "\n---\n**No previous tag found to compare.**" >> /tmp/pr_body.md
           fi
-          RAW_BODY="Automated release PR for version v${VERSION}\n\nChangelog:\n${{ steps.release_info.outputs.changelog }}${DIFF_SECTION}"
-          BODY=$(printf "%s" "$RAW_BODY" | jq -Rs .)
-          DATA=$(printf '{"title":"[CI] Release: v%s","head":"%s","base":"master","body":%s}' "$VERSION" "$BRANCH" "$BODY")
-          RESPONSE=$(curl -s -X POST \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/pulls \
-            -d "$DATA")
+
+          # Create PR using jq with --rawfile to read the body and preserve formatting
+          RESPONSE=$(jq -n \
+            --arg title "[CI] Release: v${VERSION}" \
+            --arg head "$BRANCH" \
+            --arg base "master" \
+            --rawfile body /tmp/pr_body.md \
+            '{title: $title, head: $head, base: $base, body: $body}' | \
+            curl -s -X POST \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/repos/${{ github.repository }}/pulls \
+              -d @-)
+
           PR_NUMBER=$(echo "$RESPONSE" | jq -r '.number')
           if [ "$PR_NUMBER" = "null" ] || [ -z "$PR_NUMBER" ]; then
             echo "Failed to create PR: $RESPONSE" >&2
@@ -162,3 +184,6 @@ jobs:
           fi
           echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           echo "Created PR #$PR_NUMBER"
+
+          # Cleanup
+          rm -f /tmp/pr_body.md

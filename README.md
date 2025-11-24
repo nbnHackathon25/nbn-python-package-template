@@ -35,7 +35,7 @@ cd <your-repository-name>
 # Run via script
 ./scripts/run_local.sh
 
-# Run the application manually (update with your actual command)
+# Run the application (update with your actual command)
 uv run python src/nbn_dummy_package/hello.py
 
 # Or run as a module
@@ -72,21 +72,9 @@ This project includes helper scripts for common development tasks:
 ./scripts/clean.sh --all    # Remove .venv/ too
 ```
 
-### Manual Commands
+### Common Development Commands
 
-You can also run commands directly:
-
-```bash
-# Run specific test file
-uv run pytest tests/test_hello.py -v
-
-# Run linting
-uv run ruff check --fix
-uv run ruff format
-
-# Run pre-commit on all files
-uv run pre-commit run --all-files
-```
+Add your project-specific commands here.
 
 ## CI/CD
 
@@ -101,7 +89,7 @@ This project uses GitHub Actions for automated testing and releases.
 ### Releases
 
 Create a release PR via GitHub Actions:
-1. Go to Actions → `2. Create Release PR [Manual]`
+1. Go to Actions → `2. Create Release PR [manual]`
 2. Click "Run workflow"
 3. Choose version bump (`patch`/`minor`/`major`) or enter a custom version
 

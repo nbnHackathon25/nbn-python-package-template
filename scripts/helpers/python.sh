@@ -85,7 +85,7 @@ ensure_dev_dependencies() {
 
     # Use uv to check which dev dependencies are missing
     for dep in "${required_dev_deps[@]}"; do
-        if ! uv pip list 2>/dev/null | grep -qE "^${dep}\s"; then
+        if ! uv pip show "$dep" &>/dev/null; then
             missing_deps+=("$dep")
         fi
     done

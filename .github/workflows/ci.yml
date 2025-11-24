@@ -15,7 +15,6 @@ jobs:
   pre-commit:
     name: Pre-commit Checks
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -45,8 +44,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      id-token: write
-      attestations: write
 
     strategy:
       max-parallel: 2
@@ -232,12 +229,12 @@ jobs:
         if: matrix.python-version == steps.python-version-file.outputs.version
         with:
           path: dist/*
-          name: artifact.zip
+          name: dist
 
       - uses: actions/attest-build-provenance@v3
         if: matrix.python-version == steps.python-version-file.outputs.version
         with:
-          subject-name: artifact.zip
+          subject-name: dist
           subject-digest: sha256:${{ steps.upload.outputs.artifact-digest }}
 
       - name: Generate SBOM
