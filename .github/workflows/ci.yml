@@ -225,19 +225,33 @@ jobs:
         run: |
           ./scripts/build.sh
 
-      - name: Upload build artifact
-        id: upload
+      - name: Upload build artifact - whl
+        id: upload-whl
         uses: actions/upload-artifact@v5
         if: matrix.python-version == steps.python-version-file.outputs.version
         with:
-          path: dist/*
-          name: dist
+          path: dist/*.whl
+          name: whl
+
+      - name: Upload build artifact - tar.gz
+        id: upload-tar.gz
+        uses: actions/upload-artifact@v5
+        if: matrix.python-version == steps.python-version-file.outputs.version
+        with:
+          path: dist/*.tar.gz
+          name: tar.gz
 
       - uses: actions/attest-build-provenance@v3
         if: matrix.python-version == steps.python-version-file.outputs.version
         with:
-          subject-name: dist
-          subject-digest: sha256:${{ steps.upload.outputs.artifact-digest }}
+          subject-name: whl
+          subject-digest: sha256:${{ steps.upload-whl.outputs.artifact-digest }}
+
+      - uses: actions/attest-build-provenance@v3
+        if: matrix.python-version == steps.python-version-file.outputs.version
+        with:
+          subject-name: tar.gz
+          subject-digest: sha256:${{ steps.upload-tar.gz.outputs.artifact-digest }}
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
@@ -252,5 +266,5 @@ jobs:
         uses: actions/attest-sbom@v3
         if: matrix.python-version == steps.python-version-file.outputs.version
         with:
-          subject-path: 'dist'
+          subject-path: 'dist/*.whl, dist/*.tar.gz'
           sbom-path: sbom.cyclonedx.json
