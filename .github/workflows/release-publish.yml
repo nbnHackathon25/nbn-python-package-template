@@ -77,7 +77,6 @@ jobs:
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
-        if: matrix.python-version == steps.python-version-file.outputs.version
         with:
           path: dist
           format: 'cyclonedx-json'
@@ -86,7 +85,6 @@ jobs:
 
       - name: Attest
         uses: actions/attest-sbom@v3
-        if: matrix.python-version == steps.python-version-file.outputs.version
         with:
           subject-path: 'dist/*.whl, dist/*.tar.gz'
           sbom-path: sbom.cyclonedx.json
