@@ -233,13 +233,13 @@ jobs:
           path: dist/*.whl
           name: whl
 
-      - name: Upload build artifact - tar.gz
-        id: upload-tar.gz
+      - name: Upload build artifact - tar
+        id: upload-tar
         uses: actions/upload-artifact@v5
         if: matrix.python-version == steps.python-version-file.outputs.version
         with:
           path: dist/*.tar.gz
-          name: tar.gz
+          name: tar
 
       - uses: actions/attest-build-provenance@v3
         if: matrix.python-version == steps.python-version-file.outputs.version
@@ -250,8 +250,8 @@ jobs:
       - uses: actions/attest-build-provenance@v3
         if: matrix.python-version == steps.python-version-file.outputs.version
         with:
-          subject-name: tar.gz
-          subject-digest: sha256:${{ steps.upload-tar.gz.outputs.artifact-digest }}
+          subject-name: tar
+          subject-digest: sha256:${{ steps.upload-tar.outputs.artifact-digest }}
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
