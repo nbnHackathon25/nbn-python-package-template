@@ -252,5 +252,5 @@ jobs:
         uses: actions/attest-sbom@v3
         if: matrix.python-version == steps.python-version-file.outputs.version
         with:
-          subject-path: 'dist/*.whl, dist/*.tar.gz'
+          subject-path: 'dist'
           sbom-path: sbom.cyclonedx.json
