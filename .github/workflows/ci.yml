@@ -222,11 +222,13 @@ jobs:
             }
 
       - name: Build
+        if: matrix.python-version == steps.python-version-file.outputs.version
         run: |
           ./scripts/build.sh
 
       - name: Upload build artifact
         id: upload
+        if: matrix.python-version == steps.python-version-file.outputs.version
         uses: actions/upload-artifact@v5
         with:
           path: dist/*
