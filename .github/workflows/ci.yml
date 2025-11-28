@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -44,8 +44,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      id-token: write
-      attestations: write
 
     strategy:
       max-parallel: 2
@@ -54,7 +52,7 @@ jobs:
 
     steps:
       - name: Checkout code (with commit history)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -220,38 +218,3 @@ jobs:
                 body: comment
               });
             }
-
-      - name: Build
-        if: matrix.python-version == steps.python-version-file.outputs.version
-        run: |
-          ./scripts/build.sh
-
-      - name: Upload build artifact
-        id: upload
-        if: matrix.python-version == steps.python-version-file.outputs.version
-        uses: actions/upload-artifact@v5
-        with:
-          path: dist/*
-          name: dist
-
-      - uses: actions/attest-build-provenance@v3
-        if: matrix.python-version == steps.python-version-file.outputs.version
-        with:
-          subject-name: dist
-          subject-digest: sha256:${{ steps.upload.outputs.artifact-digest }}
-
-      - name: Generate SBOM
-        uses: anchore/sbom-action@v0
-        if: matrix.python-version == steps.python-version-file.outputs.version
-        with:
-          path: dist
-          format: 'cyclonedx-json'
-          output-file: sbom.cyclonedx.json
-          dependency-snapshot: true
-
-      - name: Attest
-        uses: actions/attest-sbom@v3
-        if: matrix.python-version == steps.python-version-file.outputs.version
-        with:
-          subject-path: 'dist/*.whl, dist/*.tar.gz'
-          sbom-path: sbom.cyclonedx.json

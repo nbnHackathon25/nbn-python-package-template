@@ -108,7 +108,3 @@ See [TEMPLATE_README.md](TEMPLATE_README.md) for:
 - Testing guidelines
 - Code style guidelines
 - Pre-commit hook details
-
-## License
-
-Proprietary - Internal NBN use only. See [LICENSE](LICENSE) for details.

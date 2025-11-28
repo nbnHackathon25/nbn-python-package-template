@@ -1,15 +1,16 @@
 #!/bin/bash
 
-# Run pre-commit hooks on all files
-#
+# Usage: ./scripts/run_precommit.sh
+# Runs pre-commit hooks on all files in the repository.
 # Requirements:
-# - Dependencies installed (run ./scripts/setup.sh first)
-# - .pre-commit-config.yaml configuration file in root directory
+#   - Dependencies installed (run ./scripts/setup.sh first)
+#   - .pre-commit-config.yaml configuration file in root directory
 
 set -euo pipefail
 
 # Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SOURCE_DIR
 source "${SOURCE_DIR}/helpers/python.sh"
 source "${SOURCE_DIR}/helpers/common.sh"
 
@@ -28,7 +29,7 @@ show_precommit_summary() {
 
     print_header "Pre-commit Summary"
 
-    if [ $exit_code -eq 0 ]; then
+    if [ "$exit_code" -eq 0 ]; then
         echo "✅ All pre-commit hooks passed!"
         echo ""
         echo "Your code is ready to commit."

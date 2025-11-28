@@ -47,21 +47,14 @@ We agree to restrict the following behaviors in our community. Instances, threat
 
 Tensions can occur between community members even when they are trying their best to collaborate. Not every conflict represents a code of conduct violation, and this Code of Conduct reinforces encouraged behaviors and norms that can help avoid conflicts and minimize harm.
 
-When an incident does occur, it is important to report it promptly. You are encouraged to raise issues first with your manager. However, as that may not always be possible, there are other channels you may use, as appropriate, including:
-
-- Speaking to another people leader in your broader team
-- Raising a People Central case
-- Contacting the Fraud Management & Investigations Team
-- Contacting Legal & Regulatory
-- Making a disclosure through nbn’s whistleblower
-channels.
-
-Depending on the subject and nature of your concern, some channels may be more appropriate than others, and you might need to be guided to a different channel than the one you first identified.
+When an incident does occur, it is important to report it promptly. To report a possible violation, **[NOTE: describe your means of reporting here.]**
 
 Community Moderators take reports of violations seriously and will make every effort to respond in a timely manner. They will investigate all reports of code of conduct violations, reviewing messages, logs, and recordings, or interviewing witnesses and other participants. Community Moderators will keep investigation and enforcement actions as transparent as possible while prioritizing safety and confidentiality. In order to honor these values, enforcement actions are carried out in private with the involved parties, but communicating to the whole community may be part of a mutually agreed upon resolution.
 
 
 ## Addressing and Repairing Harm
+
+**[NOTE: The remedies and repairs outlined below are suggestions based on best practices in code of conduct enforcement. If your community has its own established enforcement process, be sure to edit this section to describe your own policies.]**
 
 If an investigation by the Community Moderators finds that this Code of Conduct has been violated, the following enforcement ladder may be used to determine how best to repair harm, based on the incident's impact on the individuals involved and the community as a whole. Depending on the severity of a violation, lower rungs on the ladder may be skipped.
 
@@ -93,8 +86,6 @@ This Code of Conduct applies within all community spaces, and also applies when 
 ## Attribution
 
 This Code of Conduct is adapted from the Contributor Covenant, version 3.0, permanently available at [https://www.contributor-covenant.org/version/3/0/](https://www.contributor-covenant.org/version/3/0/).
-
-More information about NBN Co policies are available at [https://www.nbnco.com.au/corporate-information/about-nbn-co/policies/corporate-policies](https://www.nbnco.com.au/corporate-information/about-nbn-co/policies/corporate-policies).
 
 Contributor Covenant is stewarded by the Organization for Ethical Source and licensed under CC BY-SA 4.0. To view a copy of this license, visit [https://creativecommons.org/licenses/by-sa/4.0/](https://creativecommons.org/licenses/by-sa/4.0/)
 

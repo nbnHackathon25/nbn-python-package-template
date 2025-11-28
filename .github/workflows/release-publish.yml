@@ -90,12 +90,9 @@ jobs:
           sbom-path: sbom.cyclonedx.json
 
 
-      # - name: Publish to Artifactory Pro
-      #   env:
-      #     UV_PUBLISH_USERNAME: ""
-      #     UV_PUBLISH_PASSWORD: ${{ secrets.JFROG_TOKEN }} # Replace with your JFROG token secret in GitHub
+      # - name: Publish
       #   run: |
-      #     uv publish --index nbn-artifactory
+      #     echo "TODO: publish to package index"
 
   create-tag:
     name: Create Git Tag

@@ -10,6 +10,7 @@ set -euo pipefail
 
 # Source helper functions
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SOURCE_DIR
 source "${SOURCE_DIR}/helpers/python.sh"
 source "${SOURCE_DIR}/helpers/common.sh"
 

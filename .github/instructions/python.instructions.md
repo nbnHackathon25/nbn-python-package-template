@@ -1,6 +1,6 @@
 ---
-description: "Python specific instructions for AI-assisted development. Sourced (and modified) from: https://github.com/Code-and-Sorts/awesome-copilot-agents/blob/main/instructions/languages/python/python.instructions.md"
 applyTo: "**/*.py, **/*.pyi, pyproject.toml"
+description: "Python specific instructions for AI-assisted development. Sourced (and modified) from: https://github.com/Code-and-Sorts/awesome-copilot-agents/blob/main/instructions/languages/python/python.instructions.md"
 ---
 # GitHub Copilot Instructions
 
@@ -10,7 +10,7 @@ These instructions define how GitHub Copilot should assist with this project. Th
 
 - **Project Type**: Web API / Data Pipeline / CLI Tool / ML App / Library / Script
 - **Language**: Python
-- **Framework / Libraries**: FastAPI / Flask / Django / Pandas / Pydantic
+- **Framework / Libraries**: FastAPI / Flask / Django / Pandas / Pydantic / Poetry
 - **Architecture**: MVC / Clean Architecture / Event-Driven / Microservices
 
 ## 🔧 General Guidelines
@@ -85,7 +85,7 @@ tests/
 ## Additional Custom Instructions
 - Ensure coverage is tested using `pytest-cov` and `diff-cover`.
 - Use `uv` for package management and virtual environments.
-- Use `commitizen` for commit messages and version bumping in ci.
+- Use `cz` for commit messages and version bumping in ci.
 - Use `pre-commit` hooks for linting and formatting checks before commits.
 - Use `ruff` for linting and code quality checks.
 
@@ -100,3 +100,5 @@ tests/
 - [Pytest Documentation](https://docs.pytest.org/en/stable/)
 - [Pydantic Documentation](https://docs.pydantic.dev/)
 - [Python Logging Best Practices](https://docs.python.org/3/howto/logging.html)
+- [Black Code Formatter](https://black.readthedocs.io/)
+- [Poetry](https://python-poetry.org/docs/)

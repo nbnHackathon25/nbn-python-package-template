@@ -1,6 +1,6 @@
 ---
 applyTo: '*'
-description: "Comprehensive secure coding instructions for all languages and frameworks, based on OWASP Top 10 and industry best practices. Sourced from: https://github.com/github/awesome-copilot/blob/main/instructions/security-and-owasp.instructions.md"
+description: 'Comprehensive secure coding instructions for all languages and frameworks, based on OWASP Top 10 and industry best practices. Sourced from: https://github.com/github/awesome-copilot/blob/main/instructions/security-and-owasp.instructions.md'
 ---
 # Secure Coding and OWASP Guidelines
 

@@ -1,6 +1,6 @@
 ---
 applyTo: '*'
-description: "Instructions for writing clean, readable, and maintainable code following established coding guidelines. Sourced (and modified) from: https://github.com/Code-and-Sorts/awesome-copilot-agents/blob/main/chatmodes/ai-development-mode/clean-code.chatmode.md
+description: 'Instructions for writing clean, readable, and maintainable code following established coding guidelines. Sourced (and modified) from: https://github.com/Code-and-Sorts/awesome-copilot-agents/blob/main/chatmodes/ai-development-mode/clean-code.chatmode.md'
 ---
 
 ## General Principles

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly COMMON_DIR
 source "${COMMON_DIR}/print.sh"
 source "${COMMON_DIR}/python.sh"
 

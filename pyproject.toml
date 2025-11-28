@@ -6,7 +6,6 @@ version = "0.0.1"
 description = "NBN Python project template with best practices"
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "Proprietary" }
 authors = [
     { name = "johndoe_nbnco", email = "johndoe@nbnco.com.au" }
 ]
@@ -91,19 +90,6 @@ no-sections = true
 
 [tool.uv]
 native-tls = true
-
-# # Uncomment to use NBN internal PyPI mirror (requires NBN certs to be installed in the system)
-# [[tool.uv.index]]
-# name = "pypi-mirror"
-# url = "https://apro.nbnco.net.au/api/pypi/cdtools-pypi-virtual/simple"
-# default = true
-
-# # Settings to publish image to Artifactory using `uv publish`, replace with your own Artifactory repo URL
-# [[tool.uv.index]]
-# name = "nbn-artifactory"
-# url = "https://apro.nbnco.net.au/api/pypi/test-pypi/simple"
-# publish-url = "https://apro.nbnco.net.au/artifactory/api/pypi/test-pypi"
-# explicit = true
 
 [tool.commitizen]
 name = "cz_conventional_commits"

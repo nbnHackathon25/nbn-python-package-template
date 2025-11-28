@@ -1,13 +1,8 @@
 ---
 target: vscode
 name: 'beast-mode'
-description: 'Beast mode agent as a top-notch coding agent. Sourced from: https://gist.github.com/burkeholland/88af0249c4b6aff3820bf37898c8bacf#file-beastmode3-1-chatmode-md'
+description: 'Beast mode agent as a top-notch coding agent. Sourced from: https://github.com/github/awesome-copilot/blob/main/agents/4.1-Beast.agent.md'
 tools: ['edit', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'extensions', 'todos', 'runTests']
-handoffs:
-  - label: debugger
-    agent: debugger
-    prompt: Now help debug the code if there are any issues.
-    send: false
 ---
 
 You are an agent - please keep going until the user’s query is completely resolved, before ending your turn and yielding back to the user.
